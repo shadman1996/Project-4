@@ -63,41 +63,37 @@ async def call_gemini(
 
     import asyncio as _asyncio
 
-    # Retry with backoff for free-tier rate limiting
-    last_error = None
-    for attempt in range(4):
-        try:
-            response = await _client.aio.models.generate_content(
-                model=GEMINI_MODEL,
-                contents=user_message,
-                config=config,
-            )
-            break
-        except Exception as e:
-            last_error = e
-            err_str = str(e)
-            if "429" in err_str or "RESOURCE_EXHAUSTED" in err_str:
-                wait = 60  # Quota limits usually need a full minute to reset
-                logger.warning("Gemini 429 Quota Exceeded (attempt %d/4), retrying in %ds...", attempt + 1, wait)
-                await _asyncio.sleep(wait)
-            elif "503" in err_str or "UNAVAILABLE" in err_str:
-                wait = 2 ** attempt + 2
-                logger.warning("Gemini 503 Unavailable (attempt %d/4), retrying in %ds...", attempt + 1, wait)
-                await _asyncio.sleep(wait)
-            else:
-                raise
-    else:
-        raise last_error  # type: ignore
+    async def _generate_with_retry(msg: str):
+        last_error = None
+        for attempt in range(4):
+            try:
+                return await _client.aio.models.generate_content(
+                    model=GEMINI_MODEL,
+                    contents=msg,
+                    config=config,
+                )
+            except Exception as e:
+                last_error = e
+                err_str = str(e)
+                if "429" in err_str or "RESOURCE_EXHAUSTED" in err_str:
+                    wait = 60
+                    logger.warning("Gemini 429 Quota Exceeded (attempt %d/4), retrying in %ds...", attempt + 1, wait)
+                    await _asyncio.sleep(wait)
+                elif "503" in err_str or "UNAVAILABLE" in err_str:
+                    wait = 2 ** attempt + 2
+                    logger.warning("Gemini 503 Unavailable (attempt %d/4), retrying in %ds...", attempt + 1, wait)
+                    await _asyncio.sleep(wait)
+                else:
+                    raise
+        raise last_error
 
+    response = await _generate_with_retry(user_message)
     raw_text = response.text.strip()
 
     if schema:
-        # Parse the JSON response into the Pydantic model
-        # Strip markdown fences if Gemini wraps them anyway
         cleaned = raw_text
         if cleaned.startswith("```"):
             lines = cleaned.split("\n")
-            # Remove first and last fence lines
             lines = [l for l in lines if not l.strip().startswith("```")]
             cleaned = "\n".join(lines)
 
@@ -106,17 +102,12 @@ async def call_gemini(
             return schema.model_validate(data)
         except (json.JSONDecodeError, Exception) as e:
             logger.warning("Failed to parse structured output: %s\nRaw: %s", e, raw_text[:200])
-            # Retry once with explicit instruction
             retry_msg = (
                 f"Your previous response was not valid JSON. "
                 f"Please respond with ONLY this JSON schema: {json.dumps(json_schema)}\n\n"
                 f"Original task: {user_message}"
             )
-            retry_response = await _client.aio.models.generate_content(
-                model=GEMINI_MODEL,
-                contents=retry_msg,
-                config=config,
-            )
+            retry_response = await _generate_with_retry(retry_msg)
             retry_text = retry_response.text.strip()
             if retry_text.startswith("```"):
                 lines = retry_text.split("\n")
