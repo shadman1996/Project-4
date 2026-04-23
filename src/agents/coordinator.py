@@ -72,7 +72,7 @@ class CoordinatorOrchestrator:
         }
         self.execution_log: list[dict] = []
 
-    async def run_pipeline(self, user_query: str, step_callback=None):
+    async def run_pipeline(self, user_query: str, step_callback=None, rate_limit_callback=None):
         """
         Run the full research pipeline.
 
@@ -80,15 +80,19 @@ class CoordinatorOrchestrator:
             user_query: The user's research question.
             step_callback: Optional async callback(agent_name, status, result)
                           for Chainlit to render live updates.
+            rate_limit_callback: Optional async callback(wait_secs, attempt)
+                          shown in Chainlit when Gemini quota is hit.
 
         Returns:
             Final SynthesisReport or error string.
         """
+        rl = rate_limit_callback  # shorthand
+
         # Step 1: Coordinator creates a plan
         if step_callback:
             await step_callback("Coordinator", "planning", None)
 
-        plan: CoordinatorPlan = await self.coordinator.run(user_query)
+        plan: CoordinatorPlan = await self.coordinator.run(user_query, on_rate_limit=rl)
         self.execution_log.append({"phase": "planning", "plan": plan.model_dump()})
 
         if step_callback:
@@ -105,7 +109,7 @@ class CoordinatorOrchestrator:
                 if step_callback:
                     await step_callback(agent_key, "running", task.task_description)
 
-                result = await self.agents[agent_key].run(task.task_description)
+                result = await self.agents[agent_key].run(task.task_description, on_rate_limit=rl)
                 if isinstance(result, SearchResult):
                     search_results.append(result)
 
@@ -126,6 +130,7 @@ class CoordinatorOrchestrator:
         verification: VerificationResult = await self.agents["Verification"].run(
             f"Verify these search findings for accuracy and credibility:\n{search_context}",
             context=f"Original query: {user_query}",
+            on_rate_limit=rl,
         )
 
         if step_callback:
@@ -140,6 +145,7 @@ class CoordinatorOrchestrator:
         ranked: RankedResults = await self.agents["Ranking"].run(
             f"Rank these verified findings by relevance, credibility, and recency:\n{verified_context}",
             context=f"Original query: {user_query}",
+            on_rate_limit=rl,
         )
 
         if step_callback:
@@ -154,6 +160,7 @@ class CoordinatorOrchestrator:
         report: SynthesisReport = await self.agents["Synthesis"].run(
             f"Synthesize a comprehensive research report from these ranked findings:\n{ranked_context}",
             context=f"Original query: {user_query}",
+            on_rate_limit=rl,
         )
 
         if step_callback:

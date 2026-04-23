@@ -187,9 +187,23 @@ async def on_message(message: cl.Message):
                 step.output = formatted
                 await step.update()
 
+
+    # Rate-limit toast — visible to the user instead of silent spinning
+    async def rate_limit_callback(wait_secs: int, attempt: int):
+        await cl.Message(
+            content=(
+                f"⏳ **Gemini API quota reached** (attempt {attempt}/4)\n"
+                f"Auto-retrying in **{wait_secs} seconds** — please wait, the pipeline will continue automatically."
+            )
+        ).send()
+
     # Run the pipeline
     try:
-        result = await orchestrator.run_pipeline(user_query, step_callback=step_callback)
+        result = await orchestrator.run_pipeline(
+            user_query,
+            step_callback=step_callback,
+            rate_limit_callback=rate_limit_callback,
+        )
     except Exception as e:
         logger.exception("Pipeline error")
         await cl.Message(content=f"❌ **Pipeline Error:** {e}").send()

@@ -29,6 +29,7 @@ async def call_gemini(
     user_message: str,
     schema: Type[T] | None = None,
     temperature: float = 0.3,
+    on_rate_limit=None,
 ) -> T | str:
     """
     Call Gemini and return either a Pydantic model (if schema given)
@@ -78,6 +79,11 @@ async def call_gemini(
                 if "429" in err_str or "RESOURCE_EXHAUSTED" in err_str:
                     wait = 60
                     logger.warning("Gemini 429 Quota Exceeded (attempt %d/4), retrying in %ds...", attempt + 1, wait)
+                    if on_rate_limit:
+                        try:
+                            await on_rate_limit(wait, attempt + 1)
+                        except Exception:
+                            pass
                     await _asyncio.sleep(wait)
                 elif "503" in err_str or "UNAVAILABLE" in err_str:
                     wait = 2 ** attempt + 2

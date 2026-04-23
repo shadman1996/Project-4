@@ -38,13 +38,14 @@ class BaseAgent(ABC):
         self.icon = AGENT_ICONS.get(self.name, "🤖")
         self.call_log: list[dict] = []  # Track all calls for the appendix
 
-    async def run(self, task: str, context: str = "") -> BaseModel | str:
+    async def run(self, task: str, context: str = "", on_rate_limit=None) -> BaseModel | str:
         """
         Execute the agent on a task.
 
         Args:
             task: The task/query to process.
             context: Optional prior context from upstream agents.
+            on_rate_limit: Optional async callback(wait_secs, attempt) shown in UI.
 
         Returns:
             Structured output (Pydantic model) or raw text.
@@ -59,6 +60,7 @@ class BaseAgent(ABC):
             system_prompt=self.system_prompt,
             user_message=full_message,
             schema=self.output_schema,
+            on_rate_limit=on_rate_limit,
         )
 
         # Log for the AI-Assisted Learning Appendix
