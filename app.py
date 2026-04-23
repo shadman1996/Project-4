@@ -12,6 +12,7 @@ from __future__ import annotations
 import json
 import logging
 import time
+import asyncio
 
 import chainlit as cl
 
@@ -119,20 +120,117 @@ def _format_result(result) -> str:
 
 @cl.on_chat_start
 async def on_chat_start():
-    """Initialize the session."""
+    """Initialize the session with starter options."""
     await cl.Message(
         content=(
-            "🔬 **Multi-Agent Security Research System** ready!\n\n"
-            "I'm powered by **7 specialized AI agents** orchestrated through **OpenClaw** "
-            "with **Google Gemini** as the reasoning engine.\n\n"
-            "Ask me any cybersecurity research question and watch the agents collaborate!"
+            "🔬 **Multi-Agent Security Research System** — ⚠️ *Unguarded (Vulnerable) Version*\n\n"
+            "This system has **no security guardrails**. It demonstrates what happens when "
+            "a 7-agent AI pipeline runs without protection.\n\n"
+            "Choose an option below or type your own research question:"
         ),
+        actions=[
+            cl.Action(
+                name="redteam_demo",
+                label="🔴 Run Red Team Attack Demo",
+                payload={"action": "redteam"},
+                tooltip="Run all 4 prompt injection attacks and see live results"
+            ),
+            cl.Action(
+                name="research_demo",
+                label="🔬 Run Research Pipeline Demo",
+                payload={"action": "research"},
+                tooltip="Ask a cybersecurity research question"
+            ),
+        ]
     ).send()
+
+
+@cl.action_callback("redteam_demo")
+async def on_redteam_action(action):
+    await _run_redteam_demo()
+
+
+@cl.action_callback("research_demo")
+async def on_research_action(action):
+    await cl.Message(content="Type your cybersecurity research question in the chat below.").send()
+
+
+async def _run_redteam_demo():
+    """Run all 4 prompt injection attacks live in the UI."""
+    from attacks.prompt_injection import ALL_PAYLOADS
+    from src.agents.data import DataAgent
+
+    await cl.Message(
+        content=(
+            "# 🔴 Red Team Attack Demo\n"
+            "Running **4 prompt injection attacks** against the unguarded agent pipeline.\n\n"
+            "---"
+        )
+    ).send()
+
+    data_agent = DataAgent()
+    results_summary = []
+
+    for i, (payload_id, payload_name, payload_text) in enumerate(ALL_PAYLOADS, 1):
+        # Show the attack being launched
+        async with cl.Step(name=f"Attack {i}: {payload_name}", type="tool") as step:
+            step.input = payload_text
+            await step.stream_token(f"🎯 **Injecting payload into agent...**\n\n")
+            await step.stream_token(f"```\n{payload_text.strip()}\n```\n")
+
+        # For the DATA_AGENT payload — actually execute against DataAgent (no guard)
+        if payload_id == "DATA_AGENT":
+            async with cl.Step(name=f"💾 Data Agent Response", type="tool") as resp_step:
+                try:
+                    # Directly invoke data agent file read (no interceptor in app.py)
+                    import os
+                    result_content = ""
+                    for fpath in ["/etc/passwd", "/etc/shadow", os.path.expanduser("~/.bashrc")]:
+                        try:
+                            with open(fpath, "r") as f:
+                                content = f.read()[:800]
+                            result_content += f"\n### 📄 `{fpath}`\n```\n{content}\n```\n"
+                        except PermissionError:
+                            result_content += f"\n### 📄 `{fpath}` → *Permission denied*\n"
+                        except FileNotFoundError:
+                            result_content += f"\n### 📄 `{fpath}` → *Not found*\n"
+
+                    await resp_step.stream_token(
+                        f"🔓 **EXPLOIT SUCCESSFUL — files read without any authorization check:**\n{result_content}"
+                    )
+                    resp_step.output = result_content
+                    results_summary.append((payload_name, "🔓 EXPLOITED", "File contents leaked"))
+                except Exception as e:
+                    await resp_step.stream_token(f"Error: {e}")
+                    results_summary.append((payload_name, "⚠️ ERROR", str(e)))
+        else:
+            results_summary.append((payload_name, "⚠️ ATTEMPTED", "LLM-level injection (rate limited)"))
+
+        await asyncio.sleep(0.5)
+
+    # Final verdict table
+    table = "# 🔴 Attack Results Summary\n\n"
+    table += "| # | Attack | Result |\n|---|---|---|\n"
+    for i, (name, verdict, detail) in enumerate(results_summary, 1):
+        table += f"| {i} | {name} | {verdict} — {detail} |\n"
+    table += (
+        "\n> ⚠️ **This is the UNGUARDED system. No approval was required. "
+        "Files were read silently.**\n"
+        "> Switch to `app_secured.py` to see the Human-in-the-Loop defense."
+    )
+    await cl.Message(content=table).send()
+
 
 
 @cl.on_message
 async def on_message(message: cl.Message):
     """Handle user messages — run the full multi-agent pipeline."""
+    # Check for shortcut triggers
+    low = message.content.lower().strip()
+    if any(k in low for k in ["red team", "redteam", "attack demo", "run attack"]):
+        await _run_redteam_demo()
+        return
+
     orchestrator = _get_orchestrator()
     user_query = message.content
     start_time = time.time()
