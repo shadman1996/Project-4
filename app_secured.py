@@ -297,14 +297,19 @@ async def on_message(message: cl.Message):
                 step.output = formatted
                 await step.update()
 
-    # Rate-limit toast — visible to the user instead of silent spinning
-    async def rate_limit_callback(wait_secs: int, attempt: int):
-        await cl.Message(
-            content=(
-                f"⏳ **Gemini API quota reached** (attempt {attempt}/4)\n"
-                f"Auto-retrying in **{wait_secs} seconds** — please wait, the pipeline will continue automatically."
-            )
-        ).send()
+    # Model-rotation toast — visible to the user
+    async def rate_limit_callback(exhausted_model: str, next_model: str | None):
+        if next_model:
+            await cl.Message(
+                content=(
+                    f"⚡ **Model rotated** — `{exhausted_model}` hit its quota.\n"
+                    f"Automatically switching to `{next_model}` and retrying instantly..."
+                )
+            ).send()
+        else:
+            await cl.Message(
+                content="❌ All models in the fallback chain are exhausted. Please try again later."
+            ).send()
 
     try:
         result = await orchestrator.run_pipeline(

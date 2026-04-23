@@ -12,7 +12,22 @@ load_dotenv(_PROJECT_ROOT / ".env")
 
 # --- Gemini ---
 GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
-GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-3.1-flash-lite-preview")
+
+# --- Model Fallback Chain ---
+# Ordered by: quality → quota size. Models with 0/0 quota are excluded.
+# When a model hits 429/quota, the LLM wrapper auto-rotates to the next one.
+MODEL_FALLBACK_CHAIN: list[str] = [
+    "gemini-3.1-flash-lite-preview",  # 500 RPD  — primary (best free text model)
+    "gemini-2.5-flash-lite",          # 20  RPD  — fallback
+    "gemini-3-flash-preview",         # 20  RPD  — fallback
+    "gemma-4-31b-it",                 # 1,500 RPD — high capacity
+    "gemma-4-26b-a4b-it",             # 1,500 RPD — high capacity
+    "gemma-3-27b-it",                 # 14,400 RPD — massive quota (largest Gemma)
+    "gemma-3-12b-it",                 # 14,400 RPD — large Gemma
+    "gemma-3-4b-it",                  # 14,400 RPD — medium Gemma
+    "gemma-3-1b-it",                  # 14,400 RPD — last resort (smallest)
+]
 
 # --- Project ---
 PROJECT_DIR: str = os.getenv("PROJECT_DIR", str(_PROJECT_ROOT))
