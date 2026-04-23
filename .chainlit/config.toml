@@ -95,36 +95,21 @@ reaction_on_message_received = false
 
 [UI]
 # Name of the assistant.
-name = "Assistant"
+name = "AI Security Research System"
 
-# default_theme = "dark"
+default_theme = "dark"
 
-# Force a specific language for all users (e.g., "en-US", "he-IL", "fr-FR")
-# If not set, the browser's language will be used
-# language = "en-US"
+# Description shown in HTML meta tags
+description = "7-Agent AI Research System with Red-Team Attack & HITL Security Defense — CYBR 500 Project 4"
 
-# layout = "wide"
-
-# default_sidebar_state = "open"  # Options: "open", "closed", "hidden"
-
-# Chat settings display location: "message_composer" (default) or "sidebar" (header)
-# chat_settings_location = "message_composer"
-
-# Default state of chat settings sidebar when location is "sidebar"
-# default_chat_settings_open = false
-
-# Whether to prompt user confirmation on clicking 'New Chat'
-confirm_new_chat = true
-
-# Description of the assistant. This is used for HTML tags.
-# description = ""
-
-# Chain of Thought (CoT) display mode. Can be "hidden", "tool_call" or "full".
+# Chain of Thought display
 cot = "full"
 
-# Specify a CSS file that can be used to customize the user interface.
-# The CSS file can be served from the public directory or via an external link.
-# custom_css = "/public/test.css"
+# Load the custom CSS for premium dark theme + agent colour coding
+custom_css = "/public/style.css"
+
+# Custom logo (shield + neural network)
+logo_file_url = "/public/logo_secured.png"
 
 # Specify additional attributes for a custom CSS file
 # custom_css_attributes = "media=\"print\""
