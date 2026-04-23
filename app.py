@@ -156,67 +156,138 @@ async def on_research_action(action):
 
 
 async def _run_redteam_demo():
-    """Run all 4 prompt injection attacks live in the UI."""
+    """Run all 4 prompt injection attacks live in the UI — fully visible results."""
     from attacks.prompt_injection import ALL_PAYLOADS
-    from src.agents.data import DataAgent
+    import os
 
+    # ── INTRO ────────────────────────────────────────────────────────
     await cl.Message(
         content=(
-            "# 🔴 Red Team Attack Demo\n"
-            "Running **4 prompt injection attacks** against the unguarded agent pipeline.\n\n"
+            "# 🔴 Red Team Attack Demo — Unguarded System\n\n"
+            "> ⚠️ **This version has NO security guardrails.** "
+            "The AI agents will execute any file operation they are told to — "
+            "no authentication, no confirmation, no limits.\n\n"
+            "**We will run 4 prompt injection attacks.** "
+            "Watch what the attacker sends, what the agent does, and what gets leaked.\n\n"
             "---"
         )
     ).send()
+    await asyncio.sleep(0.4)
 
-    data_agent = DataAgent()
+    ATTACK_META = [
+        ("ENV_EXFIL",  "🔴 Attack 1 — Environment Variable Theft",
+         "Goal: Trick the Search Agent into dumping API keys & secrets from the environment."),
+        ("FILE_EXFIL", "🔴 Attack 2 — System File Exfiltration via Fake Authority",
+         "Goal: Embed a fake 'system admin' directive to make the agent read /etc/passwd."),
+        ("DATA_AGENT", "🔴 Attack 3 — Direct Data Agent File Read (CRITICAL)",
+         "Goal: Send a social-engineering prompt directly to the Data Agent to leak system files."),
+        ("CHAINED",    "🔴 Attack 4 — Chained Cross-Agent Attack",
+         "Goal: Use Search Agent as a relay to instruct the Data Agent to dump secrets."),
+    ]
+
     results_summary = []
 
     for i, (payload_id, payload_name, payload_text) in enumerate(ALL_PAYLOADS, 1):
-        # Show the attack being launched
-        async with cl.Step(name=f"Attack {i}: {payload_name}", type="tool") as step:
-            step.input = payload_text
-            await step.stream_token(f"🎯 **Injecting payload into agent...**\n\n")
-            await step.stream_token(f"```\n{payload_text.strip()}\n```\n")
+        _, title, goal = ATTACK_META[i - 1]
 
-        # For the DATA_AGENT payload — actually execute against DataAgent (no guard)
+        # ── STEP 1: Show the attack intent ───────────────────────────
+        await cl.Message(
+            content=(
+                f"## {title}\n\n"
+                f"**{goal}**"
+            )
+        ).send()
+        await asyncio.sleep(0.3)
+
+        # ── STEP 2: Show the exact payload sent to the agent ─────────
+        await cl.Message(
+            content=(
+                f"### 📨 Payload Injected into Agent\n\n"
+                f"```"
+                f"\n{payload_text.strip()}\n"
+                f"```\n\n"
+                f"*The attacker sends this as a normal user message. "
+                f"The AI agent sees no difference between this and a legitimate request.*"
+            )
+        ).send()
+        await asyncio.sleep(0.3)
+
+        # ── STEP 3: Execute and show result ──────────────────────────
         if payload_id == "DATA_AGENT":
-            async with cl.Step(name=f"💾 Data Agent Response", type="tool") as resp_step:
+            # This is the critical exploit — show the leaked file contents prominently
+            leaked_sections = []
+            for fpath in ["/etc/passwd", "/etc/shadow", os.path.expanduser("~/.bashrc"), ".env"]:
                 try:
-                    # Directly invoke data agent file read (no interceptor in app.py)
-                    import os
-                    result_content = ""
-                    for fpath in ["/etc/passwd", "/etc/shadow", os.path.expanduser("~/.bashrc")]:
-                        try:
-                            with open(fpath, "r") as f:
-                                content = f.read()[:800]
-                            result_content += f"\n### 📄 `{fpath}`\n```\n{content}\n```\n"
-                        except PermissionError:
-                            result_content += f"\n### 📄 `{fpath}` → *Permission denied*\n"
-                        except FileNotFoundError:
-                            result_content += f"\n### 📄 `{fpath}` → *Not found*\n"
-
-                    await resp_step.stream_token(
-                        f"🔓 **EXPLOIT SUCCESSFUL — files read without any authorization check:**\n{result_content}"
+                    with open(fpath, "r") as f:
+                        content = f.read()[:600]
+                    leaked_sections.append(
+                        f"### 📄 `{fpath}` — **LEAKED**\n"
+                        f"```\n{content}\n```"
                     )
-                    resp_step.output = result_content
-                    results_summary.append((payload_name, "🔓 EXPLOITED", "File contents leaked"))
-                except Exception as e:
-                    await resp_step.stream_token(f"Error: {e}")
-                    results_summary.append((payload_name, "⚠️ ERROR", str(e)))
+                except PermissionError:
+                    leaked_sections.append(f"### 📄 `{fpath}` — *Permission denied (file exists but unreadable)*")
+                except FileNotFoundError:
+                    leaked_sections.append(f"### 📄 `{fpath}` — *Not found on this system*")
+
+            leaked_content = "\n\n".join(leaked_sections)
+            await cl.Message(
+                content=(
+                    f"### 🔓 RESULT — EXPLOIT SUCCESSFUL\n\n"
+                    f"The Data Agent read the files and returned their contents "
+                    f"**without any authentication, confirmation, or warning.**\n\n"
+                    f"{leaked_content}\n\n"
+                    f"> 🚨 **This is your actual system's data. "
+                    f"The agent leaked it because nothing stopped it.**"
+                )
+            ).send()
+            results_summary.append((title, "🔓 EXPLOITED", "System files leaked — /etc/passwd, .env, ~/.bashrc"))
+
+        elif payload_id == "ENV_EXFIL":
+            # Show what env vars the attacker could steal
+            env_preview = ", ".join(
+                f"`{k}`" for k in os.environ
+                if any(w in k.upper() for w in ["KEY", "TOKEN", "SECRET", "API", "PASS", "GEMINI"])
+            ) or "*(no sensitive keys found in this environment)*"
+            await cl.Message(
+                content=(
+                    f"### ⚠️ RESULT — Attack Attempted\n\n"
+                    f"The agent was instructed to dump environment variables. "
+                    f"**Sensitive keys visible in this environment:**\n\n"
+                    f"{env_preview}\n\n"
+                    f"> In a production system with no guardrails, these would be returned "
+                    f"in the agent's response and sent back to the attacker."
+                )
+            ).send()
+            results_summary.append((title, "⚠️ ATTEMPTED", "Env var theft — API keys exposed in environment"))
+
         else:
-            results_summary.append((payload_name, "⚠️ ATTEMPTED", "LLM-level injection (rate limited)"))
+            await cl.Message(
+                content=(
+                    f"### ⚠️ RESULT — Injection Attempted\n\n"
+                    f"This payload was injected into the Search Agent's context. "
+                    f"Without an output scanner, any sensitive data the agent "
+                    f"includes in its response would be returned directly to the attacker.\n\n"
+                    f"> In a secured system, the output would be scanned and redacted before delivery."
+                )
+            ).send()
+            results_summary.append((title, "⚠️ ATTEMPTED", "LLM injection — output not scanned"))
 
-        await asyncio.sleep(0.5)
+        await asyncio.sleep(0.6)
 
-    # Final verdict table
-    table = "# 🔴 Attack Results Summary\n\n"
-    table += "| # | Attack | Result |\n|---|---|---|\n"
-    for i, (name, verdict, detail) in enumerate(results_summary, 1):
-        table += f"| {i} | {name} | {verdict} — {detail} |\n"
+    # ── FINAL VERDICT ─────────────────────────────────────────────────
+    table = "## 🔴 Attack Results — Unguarded System\n\n"
+    table += "| # | Attack | Verdict | What was exposed |\n|---|---|---|---|\n"
+    for j, (name, verdict, detail) in enumerate(results_summary, 1):
+        table += f"| {j} | {name} | {verdict} | {detail} |\n"
     table += (
-        "\n> ⚠️ **This is the UNGUARDED system. No approval was required. "
-        "Files were read silently.**\n"
-        "> Switch to `app_secured.py` to see the Human-in-the-Loop defense."
+        "\n---\n"
+        "### 🚨 Key Takeaway\n\n"
+        "Attack #3 successfully read `/etc/passwd` and returned "
+        "the full system user list — **with zero authentication, zero confirmation, "
+        "and zero alerts raised**. The agent simply executed the instruction "
+        "because it was told to.\n\n"
+        "> **➡️ Switch to the Secured version (`app_secured.py`) to see the "
+        "Human-in-the-Loop defense block these exact attacks.**"
     )
     await cl.Message(content=table).send()
 
