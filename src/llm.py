@@ -75,9 +75,14 @@ async def call_gemini(
             break
         except Exception as e:
             last_error = e
-            if "503" in str(e) or "UNAVAILABLE" in str(e) or "429" in str(e):
-                wait = 2 ** attempt + 1
-                logger.warning("Gemini rate-limited (attempt %d/4), retrying in %ds...", attempt + 1, wait)
+            err_str = str(e)
+            if "429" in err_str or "RESOURCE_EXHAUSTED" in err_str:
+                wait = 60  # Quota limits usually need a full minute to reset
+                logger.warning("Gemini 429 Quota Exceeded (attempt %d/4), retrying in %ds...", attempt + 1, wait)
+                await _asyncio.sleep(wait)
+            elif "503" in err_str or "UNAVAILABLE" in err_str:
+                wait = 2 ** attempt + 2
+                logger.warning("Gemini 503 Unavailable (attempt %d/4), retrying in %ds...", attempt + 1, wait)
                 await _asyncio.sleep(wait)
             else:
                 raise
