@@ -64,14 +64,41 @@
   nav.innerHTML = `
     <button class="p4-nav-btn red" data-cmd="red team" title="Run 4 live prompt injection attacks against an unguarded AI system to see data get leaked">🔴 Vulnerable Demo</button>
     <button class="p4-nav-btn green" data-cmd="defence demo" title="Run the same 4 attacks against the system protected by a Human-in-the-Loop Security Interceptor">🛡️ Secured Demo</button>
-    <button class="p4-nav-btn" onclick="document.getElementById('readme-button')?.click()" title="View Instructions">📖 Readme</button>
-    <button class="p4-nav-btn" onclick="document.getElementById('theme-toggle')?.click()" title="Toggle Light/Dark Theme">🌓 Theme</button>
     <button class="p4-nav-btn" onclick="window.location.reload()" title="Clear chat history and start over">💬 New Chat</button>
-    <button class="p4-nav-btn" onclick="window.location.href='/'" title="Return to Chat Interface">🔙 Back to Chat</button>
+    <button class="p4-nav-btn" id="p4-tut-btn" onclick="if(window.startP4Tutorial) window.startP4Tutorial()" title="Restart the Interactive Tutorial">🎓 Tutorial</button>
+    <button class="p4-nav-btn" id="p4-readme-btn" title="View Instructions">📖 Readme</button>
     <button class="p4-nav-btn" onclick="window.open('https://github.com/shadman1996/Project-4', '_blank')" title="View source code and official CYBR 500 reports on GitHub">🔗 GitHub Repo</button>
-    <button class="p4-nav-btn" onclick="if(window.startP4Tutorial) window.startP4Tutorial()" title="Restart the Interactive Tutorial">🎓 Tutorial</button>
   `;
   document.body.appendChild(nav);
+
+  setInterval(() => {
+    const isReadme = window.location.pathname.includes('/readme') || document.querySelector('.readme') !== null;
+    const rBtn = document.getElementById("p4-readme-btn");
+    const tBtn = document.getElementById("p4-tut-btn");
+    const c = document.getElementById("p4c");
+    const spt = document.getElementById("p4spt");
+    const arr = document.getElementById("p4arr");
+    
+    if (rBtn) {
+      if (isReadme) {
+        rBtn.innerHTML = "🔙 Back to Chat";
+        rBtn.onclick = () => window.location.href = '/';
+        rBtn.style.background = "rgba(99, 102, 241, 0.2)";
+        if (tBtn) { tBtn.style.opacity = "0.3"; tBtn.style.pointerEvents = "none"; }
+        if (c) c.style.display = "none";
+        if (spt) spt.style.display = "none";
+        if (arr) arr.style.display = "none";
+      } else {
+        rBtn.innerHTML = "📖 Readme";
+        rBtn.onclick = () => document.getElementById('readme-button')?.click();
+        rBtn.style.background = "";
+        if (tBtn) { tBtn.style.opacity = "1"; tBtn.style.pointerEvents = "auto"; }
+        if (c) c.style.display = "block";
+        if (spt) spt.style.display = "block";
+        if (arr) arr.style.display = "block";
+      }
+    }
+  }, 200);
 
   // Send command to Chainlit via hidden input
   nav.addEventListener("click", (e) => {
@@ -131,12 +158,22 @@
   @keyframes p4ping{0%,100%{transform:scale(.5);opacity:.9}50%{transform:scale(1.3);opacity:.2}}
   #p4spt{position:fixed;z-index:9989;border:2px solid rgba(99,102,241,.7);border-radius:13px;box-shadow:0 0 0 4000px rgba(5,10,22,.48),0 0 45px rgba(99,102,241,.38);pointer-events:none;transition:top .4s cubic-bezier(.4,0,.2,1),left .4s cubic-bezier(.4,0,.2,1),width .4s cubic-bezier(.4,0,.2,1),height .4s cubic-bezier(.4,0,.2,1),opacity .3s}
   #p4spt.red{border-color:rgba(239,68,68,.8);box-shadow:0 0 0 4000px rgba(5,10,22,.48),0 0 45px rgba(239,68,68,.45)}
-  #p4arr{position:fixed;z-index:9994;pointer-events:none;transition:top .4s cubic-bezier(.4,0,.2,1),left .4s cubic-bezier(.4,0,.2,1),opacity .3s;animation:p4bnc .85s ease-in-out infinite alternate}
-  @keyframes p4bnc{from{transform:translateY(0)}to{transform:translateY(7px)}}
-  .ad{width:0;height:0;border-left:10px solid transparent;border-right:10px solid transparent;border-top:13px solid rgba(99,102,241,.85)}
-  .au{width:0;height:0;border-left:10px solid transparent;border-right:10px solid transparent;border-bottom:13px solid rgba(99,102,241,.85)}
-  .ard{width:0;height:0;border-left:10px solid transparent;border-right:10px solid transparent;border-top:13px solid rgba(239,68,68,.85)}
-  .aru{width:0;height:0;border-left:10px solid transparent;border-right:10px solid transparent;border-bottom:13px solid rgba(239,68,68,.85)}
+  #p4arr{position:fixed;z-index:9994;pointer-events:none;transition:top .4s cubic-bezier(.4,0,.2,1),left .4s cubic-bezier(.4,0,.2,1),opacity .3s;animation:p4bnc .85s ease-in-out infinite alternate;font-size:2rem;filter:drop-shadow(0 4px 6px rgba(0,0,0,0.5))}
+  @keyframes p4bnc{from{transform:translateY(-5px)}to{transform:translateY(5px)}}
+
+  /* Light Mode Overrides for Tutorial Box */
+  [data-theme="light"] #p4c, .light #p4c {
+    background: rgba(255, 255, 255, 0.98);
+    border-color: rgba(99, 102, 241, 0.3);
+    color: #1e293b;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  }
+  [data-theme="light"] #p4ttl, .light #p4ttl { color: #0f172a; }
+  [data-theme="light"] #p4bdy, .light #p4bdy { color: #475569; }
+  [data-theme="light"] #p4bdy strong, .light #p4bdy strong { color: #0f172a; }
+  [data-theme="light"] .p4term, .light .p4term { background: #f8fafc; border-color: rgba(239, 68, 68, 0.3); box-shadow: 0 4px 12px rgba(239, 68, 68, 0.08); }
+  [data-theme="light"] .p4tbody, .light .p4tbody { color: #059669; }
+  [data-theme="light"] .p4hrow span, .light .p4hrow span { color: #1e293b; }
   /* Terminal widget */
   .p4term{background:#080808;border:1px solid rgba(239,68,68,.4);border-radius:10px;overflow:hidden;margin:.7rem 0 .85rem;box-shadow:0 0 18px rgba(239,68,68,.15),inset 0 1px 0 rgba(255,255,255,.03)}
   .p4tbar{background:rgba(239,68,68,.13);border-bottom:1px solid rgba(239,68,68,.22);padding:.3rem .65rem;display:flex;align-items:center;gap:.35rem}
@@ -385,19 +422,12 @@ Just click the <strong>🔗 GitHub Repo & Reports</strong> button on the navigat
 
     // Spotlight class
     spt.className = s.spotlightClass === "red" ? "red" : "";
-    arr.className = s.arrowClass || "";
+    arr.className = "";
 
     if (tgt) {
       const r = tgt.getBoundingClientRect();
 
       spt.style.cssText += `;opacity:1;top:${r.top-8}px;left:${r.left-8}px;width:${r.width+16}px;height:${r.height+16}px`;
-
-      if (s.arrowClass) {
-        const isDown = s.arrowClass.includes("d");
-        arr.style.cssText += `;opacity:1;top:${isDown ? r.bottom+6 : r.top-20}px;left:${r.left+r.width/2-10}px`;
-      } else {
-        arr.style.opacity = "0";
-      }
 
       cur.style.cssText += `;opacity:1;left:${r.left+r.width/2}px;top:${r.top+r.height/2}px`;
 
@@ -413,10 +443,16 @@ Just click the <strong>🔗 GitHub Repo & Reports</strong> button on the navigat
       const cardH = 300;
       const actualCardW = Math.min(370, vw * 0.91);
       let cardLeft = Math.max(PAD, Math.min(r.left + r.width/2 - actualCardW/2, vw - actualCardW - PAD));
-
+      
       if (spaceBelow > cardH || spaceBelow >= r.top - PAD) {
+        // Target is above card -> finger points UP to target
+        arr.innerHTML = "👆";
+        arr.style.cssText += `;opacity:1;top:${r.bottom+2}px;left:${r.left+r.width/2-16}px;transform:none`;
         card.style.cssText += `;top:${r.bottom+18}px;bottom:auto;left:${cardLeft}px;right:auto;transform:none`;
       } else {
+        // Target is below card -> finger points DOWN to target
+        arr.innerHTML = "👇";
+        arr.style.cssText += `;opacity:1;top:${r.top-36}px;left:${r.left+r.width/2-16}px;transform:none`;
         card.style.cssText += `;bottom:${vh-r.top+18}px;top:auto;left:${cardLeft}px;right:auto;transform:none`;
       }
 
