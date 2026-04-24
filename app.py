@@ -11,8 +11,19 @@ from __future__ import annotations
 
 import json
 import logging
+import os
+import sys
 import time
 import asyncio
+
+# ── Ensure project root is on sys.path so local packages (attacks, src) resolve
+# regardless of the directory Chainlit launches from.
+_PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
+if _PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, _PROJECT_ROOT)
+
+# ── Now safe to import local packages ──────────────────────────────────────
+from attacks.prompt_injection import ALL_PAYLOADS  # noqa: E402
 
 import chainlit as cl
 
@@ -157,8 +168,7 @@ async def on_research_action(action):
 
 async def _run_redteam_demo():
     """Run all 4 prompt injection attacks live in the UI — fully visible results."""
-    from attacks.prompt_injection import ALL_PAYLOADS
-    import os
+    # ALL_PAYLOADS and os already imported at module level
 
     # ── INTRO ────────────────────────────────────────────────────────
     await cl.Message(

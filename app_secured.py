@@ -13,7 +13,15 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import os
+import sys
 import time
+
+# ── Ensure project root is on sys.path so local packages (src, attacks) resolve
+# regardless of the directory Chainlit launches from.
+_PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
+if _PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, _PROJECT_ROOT)
 
 import chainlit as cl
 
