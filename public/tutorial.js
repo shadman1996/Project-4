@@ -11,17 +11,22 @@
   const style = document.createElement("style");
   style.textContent = `
     #p4-navbar {
-      position: fixed; top: 0; left: 0; right: 0; height: 50px;
+      position: fixed; top: 0; left: 0; right: 0; min-height: 50px;
       background: rgba(9, 16, 36, 0.85); backdrop-filter: blur(8px);
       border-bottom: 1px solid rgba(99, 102, 241, 0.3);
       z-index: 9999; display: flex; align-items: center; justify-content: center;
       gap: 1rem; font-family: 'Inter', sans-serif;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+      padding: 0.5rem; flex-wrap: wrap;
     }
     .p4-nav-btn {
       background: transparent; color: #cbd5e1; border: none;
       padding: 0.4rem 0.8rem; font-size: 0.85rem; font-weight: 600;
       border-radius: 6px; cursor: pointer; transition: all 0.2s;
+    }
+    @media (max-width: 650px) {
+      #p4-navbar { gap: 0.4rem; padding: 0.4rem; justify-content: space-evenly; }
+      .p4-nav-btn { font-size: 0.72rem; padding: 0.4rem 0.5rem; flex: 1 1 auto; text-align: center; }
     }
     .p4-nav-btn:hover { background: rgba(99, 102, 241, 0.15); color: #fff; }
     .p4-nav-btn.red:hover { background: rgba(239, 68, 68, 0.15); color: #fca5a5; }
@@ -391,7 +396,8 @@ Just click the <strong>🔗 GitHub Repo & Reports</strong> button on the navigat
       // Card: below or above
       const spaceBelow = vh - r.bottom - PAD;
       const cardH = 300;
-      let cardLeft = Math.max(PAD, Math.min(r.left + r.width/2 - 185, vw - 370 - PAD));
+      const actualCardW = Math.min(370, vw * 0.91);
+      let cardLeft = Math.max(PAD, Math.min(r.left + r.width/2 - actualCardW/2, vw - actualCardW - PAD));
 
       if (spaceBelow > cardH || spaceBelow >= r.top - PAD) {
         card.style.cssText += `;top:${r.bottom+18}px;bottom:auto;left:${cardLeft}px;right:auto;transform:none`;
@@ -404,7 +410,9 @@ Just click the <strong>🔗 GitHub Repo & Reports</strong> button on the navigat
       cur.style.opacity = "0";
       arr.style.opacity = "0";
       $id("p4int").style.display = "none";
-      card.style.cssText += `;top:80px;right:24px;left:auto;bottom:auto;transform:none`;
+      const actualCardW = Math.min(370, vw * 0.91);
+      const rightPad = Math.max(16, vw * 0.03);
+      card.style.cssText += `;top:80px;right:${rightPad}px;left:auto;bottom:auto;transform:none`;
     }
   }
 
