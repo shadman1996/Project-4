@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 class CoordinatorAgent(BaseAgent):
     name = "Coordinator"
     output_schema = CoordinatorPlan
-    system_prompt = """You are the Coordinator Agent for a cybersecurity research system.
+    system_prompt = """You are the Coordinator Agent for a Graduate-Level Academic Research Pipeline.
 
 Your job is to:
 1. Understand the user's research query

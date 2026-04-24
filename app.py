@@ -244,7 +244,7 @@ async def on_chat_start():
 
     await cl.Message(
         content=(
-            "## 🛡️ Multi-Agent Research System\n\n"
+            "## 🛡️ Graduate-Level Academic Research Pipeline\n\n"
             "Welcome to the interactive demonstration for CYBR 500.\n\n"
             "This application contains both the **unguarded** and **secured** versions of the AI pipeline. "
             "Choose an option below to get started:"
