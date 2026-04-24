@@ -14,10 +14,11 @@
       position: fixed; top: 0; left: 0; right: 0; min-height: 50px;
       background: rgba(9, 16, 36, 0.85); backdrop-filter: blur(8px);
       border-bottom: 1px solid rgba(99, 102, 241, 0.3);
-      z-index: 9999; display: flex; align-items: center; justify-content: center;
+      z-index: 99999; display: flex; align-items: center; justify-content: center;
       gap: clamp(0.2rem, 1vw, 1rem); font-family: 'Inter', sans-serif;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
       padding: clamp(0.2rem, 1vw, 0.5rem); flex-wrap: wrap;
+      pointer-events: auto !important;
     }
     .p4-nav-btn {
       background: transparent; color: #cbd5e1; border: none;
@@ -82,7 +83,12 @@
     if (rBtn) {
       if (isReadme) {
         rBtn.innerHTML = "🔙 Back to Chat";
-        rBtn.onclick = () => window.location.href = '/';
+        rBtn.onclick = () => {
+          // Dispatch Escape to safely close the native Chainlit modal
+          document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', bubbles: true }));
+          // Fallback if modal doesn't close
+          setTimeout(() => { if (document.querySelector('.readme')) window.location.href = '/'; }, 300);
+        };
         rBtn.style.background = "rgba(99, 102, 241, 0.2)";
         if (tBtn) { tBtn.style.opacity = "0.3"; tBtn.style.pointerEvents = "none"; }
         if (c) c.style.display = "none";
