@@ -326,9 +326,17 @@ Just click the <strong>🔗 GitHub Repo & Reports</strong> button on the navigat
       if (s.waitForClick) {
         const tgt = findTarget(s);
         if (tgt) {
-          const handler = () => { advance(); };
-          tgt.addEventListener("click", handler, { once: true });
-          removeClickInterceptor = () => tgt.removeEventListener("click", handler);
+          const r = tgt.getBoundingClientRect();
+          const interceptor = document.createElement("div");
+          interceptor.style.cssText = `position:fixed;z-index:99999;cursor:pointer;left:${r.left-8}px;top:${r.top-8}px;width:${r.width+16}px;height:${r.height+16}px`;
+          document.body.appendChild(interceptor);
+          
+          const handler = () => { 
+            tgt.click();
+            advance(); 
+          };
+          interceptor.addEventListener("click", handler, { once: true });
+          removeClickInterceptor = () => interceptor.remove();
         }
       }
     };
