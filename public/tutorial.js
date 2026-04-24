@@ -473,8 +473,39 @@ Just click the <strong>🔗 GitHub Repo & Reports</strong> button on the navigat
 
     document.addEventListener("keydown", onKey);
     window.addEventListener("resize", handleResize);
+    document.body.addEventListener("click", agenticObserver);
     render(0);
     makeDraggable(card);
+  }
+
+  function agenticObserver(e) {
+    if (!document.getElementById("p4c") || !e.isTrusted) return;
+    let targetBtn = e.target.closest("button");
+    if (!targetBtn) return;
+
+    const ttl = document.getElementById("p4ttl");
+    const bdy = document.getElementById("p4bdy");
+    if (!ttl || !bdy) return;
+
+    if (targetBtn.classList.contains("green")) {
+      if (cur < 3) {
+        cur = 4; // Jump straight to HITL demo
+        render(cur);
+        ttl.innerHTML = "🧠 Agentic Reaction!";
+        bdy.innerHTML = "I see you skipped ahead and clicked the <strong>Secured Demo</strong>! Excellent choice.<br><br>Watch the chat: the security interceptor is about to catch the rogue agent in real time.";
+      }
+    } else if (targetBtn.classList.contains("red")) {
+      if (cur > 2) {
+        ttl.innerHTML = "🧠 Agentic Reaction!";
+        bdy.innerHTML = "Running the <strong>Vulnerable Demo</strong> again! Notice how fast the OpenClaw agents execute when there are no security guards in place.";
+      }
+    } else if (targetBtn.innerText && targetBtn.innerText.includes("Readme")) {
+        ttl.innerHTML = "🧠 Agentic Reaction!";
+        bdy.innerHTML = "Ah, studying the documentation! Good call.<br><br>The Readme explains the full 7-agent OpenClaw architecture. Close it to continue.";
+    } else if (targetBtn.innerText && targetBtn.innerText.includes("GitHub")) {
+        ttl.innerHTML = "🧠 Agentic Reaction!";
+        bdy.innerHTML = "Checking out the GitHub! The CYBR 500 reports and source code are fully populated there.";
+    }
   }
 
   function makeDraggable(el) {
@@ -525,6 +556,7 @@ Just click the <strong>🔗 GitHub Repo & Reports</strong> button on the navigat
   function destroy() {
     document.removeEventListener("keydown", onKey);
     window.removeEventListener("resize", handleResize);
+    document.body.removeEventListener("click", agenticObserver);
     ["p4b","p4c","p4cur","p4spt","p4arr","p4int"].forEach(id => $id(id)?.remove());
   }
 
