@@ -29,6 +29,19 @@
     
     /* Push chainlit body down slightly so navbar doesn't cover header */
     #root { padding-top: 50px !important; }
+
+    /* Light Mode Overrides for Navbar */
+    [data-theme="light"] #p4-navbar, .light #p4-navbar {
+      background: rgba(255, 255, 255, 0.85);
+      border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+    }
+    [data-theme="light"] .p4-nav-btn, .light .p4-nav-btn {
+      color: #475569;
+    }
+    [data-theme="light"] .p4-nav-btn:hover, .light .p4-nav-btn:hover {
+      color: #0f172a;
+      background: rgba(99, 102, 241, 0.1);
+    }
   `;
   document.head.appendChild(style);
 

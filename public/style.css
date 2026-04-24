@@ -51,6 +51,30 @@
   --dur:   200ms;
 }
 
+/* ── Light Mode Overrides ───────────────────────────────────── */
+[data-theme="light"], .light {
+  /* Backgrounds */
+  --bg-base:        #f1f5f9;
+  --bg-surface:     #ffffff;
+  --bg-card:        rgba(255, 255, 255, 0.90);
+  --bg-card-hover:  rgba(248, 250, 252, 0.95);
+  --bg-glass:       rgba(0, 0, 0, 0.04);
+
+  /* Text */
+  --text-bright:     #0f172a;
+  --text-primary:    #1e293b;
+  --text-secondary:  #475569;
+  --text-muted:      #94a3b8;
+
+  /* Borders */
+  --border-subtle:   rgba(99,102,241,0.20);
+  --border-glow:     rgba(99,102,241,0.30);
+
+  /* Adjust brand colours for better visibility on light background */
+  --cyan:            #0284c7;
+  --cyan-dim:        rgba(2,132,199,0.15);
+}
+
 /* ── Base & Fonts ───────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
 
@@ -73,6 +97,12 @@ body::before {
   z-index: 0;
 }
 
+[data-theme="light"] body::before, .light body::before {
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 10%, rgba(99,102,241,0.04) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 80% 80%, rgba(2,132,199,0.04) 0%, transparent 60%);
+}
+
 /* ── Header / Navbar ────────────────────────────────────────── */
 header,
 .cl-header,
@@ -81,6 +111,11 @@ header,
   border-bottom: 1px solid var(--border-subtle) !important;
   backdrop-filter: blur(20px) !important;
   box-shadow: 0 1px 0 rgba(99,102,241,0.08) !important;
+}
+
+[data-theme="light"] header, [data-theme="light"] .cl-header, [data-theme="light"] [class*="header"],
+.light header, .light .cl-header, .light [class*="header"] {
+  background: rgba(255, 255, 255, 0.95) !important;
 }
 
 /* App title */
