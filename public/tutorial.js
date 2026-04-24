@@ -33,7 +33,7 @@
     .p4-nav-btn.green:hover { background: rgba(16, 185, 129, 0.15); color: #6ee7b7; }
     
     /* Push chainlit body down slightly so navbar doesn't cover header */
-    #root { padding-top: 50px !important; }
+    #root { padding-top: 50px !important; height: 100vh !important; box-sizing: border-box !important; }
 
     /* Light Mode Overrides for Navbar */
     [data-theme="light"] #p4-navbar, .light #p4-navbar {
@@ -55,7 +55,9 @@
   nav.innerHTML = `
     <button class="p4-nav-btn red" data-cmd="red team" title="Run 4 live prompt injection attacks against an unguarded AI system to see data get leaked">🔴 Vulnerable Demo</button>
     <button class="p4-nav-btn green" data-cmd="defence demo" title="Run the same 4 attacks against the system protected by a Human-in-the-Loop Security Interceptor">🛡️ Secured Demo</button>
-    <button class="p4-nav-btn" onclick="window.open('https://github.com/shadman1996/Project-4', '_blank')" title="View source code and official CYBR 500 reports on GitHub">🔗 GitHub Repo & Reports</button>
+    <button class="p4-nav-btn" onclick="window.open('https://github.com/shadman1996/Project-4', '_blank')" title="View source code and official CYBR 500 reports on GitHub">🔗 GitHub Repo</button>
+    <button class="p4-nav-btn" onclick="window.location.reload()" title="Clear chat history and restart the application">🧹 Clear Chat</button>
+    <button class="p4-nav-btn" onclick="if(window.startP4Tutorial) window.startP4Tutorial()" title="Restart the Interactive Tutorial">🎓 Tutorial</button>
   `;
   document.body.appendChild(nav);
 
@@ -512,6 +514,12 @@ Just click the <strong>🔗 GitHub Repo & Reports</strong> button on the navigat
     window.removeEventListener("resize", handleResize);
     ["p4b","p4c","p4cur","p4spt","p4arr","p4int"].forEach(id => $id(id)?.remove());
   }
+
+  window.startP4Tutorial = function() {
+    destroy();
+    cur = 0;
+    init();
+  };
 
   // ── Launch after Chainlit mounts ────────────────────────────────────────────
   let attempts = 0;
