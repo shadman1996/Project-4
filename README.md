@@ -220,3 +220,12 @@ You type a question
 
 The complete CYBR 500 conference-style paper is at:  
 📄 [`report/project4_report.md`](report/project4_report.md)
+
+---
+
+## About the Author
+
+**Shadman**  
+Cybersecurity Researcher & Developer | [GitHub Profile](https://github.com/shadman1996)
+
+This project was developed for **CYBR 500: Advanced Cybersecurity Research**, focusing on the emerging intersection of AI agents and application security. It demonstrates both offensive (red-teaming prompt injection) and defensive (Human-in-the-Loop interception) techniques for securing autonomous LLM ecosystems.
