@@ -6,7 +6,7 @@
 
 ## For the Professor / Grading
 All official documentation required for the CYBR 500 Project 4 submission can be found in the **[`report/`](./report)** folder of this repository:
-1. `CYBR500_Prj4_Conference_Report_Template_April17.docx` (The fully populated 15-section final report with AI-Assisted Learning Appendix)
+1. `CYBR500_Project4_Final_Report_Shadman.docx` (The fully populated 15-section final report with AI-Assisted Learning Appendix)
 2. `CYBR500_Project4_Instruction_handout_April17.docx` (Reference Instructions)
 3. `prj4_resources.docx` (Reference Resources)
 
