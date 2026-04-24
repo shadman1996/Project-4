@@ -159,16 +159,16 @@ Use <strong>← →</strong> keys or buttons to navigate. Let's go!`,
     },
     {
       badge: "Step 1 of 6",
-      title: "🔴 The Red Team Attack Button",
+      title: "🔴 The Vulnerable System Demo",
       body: `This button runs <strong>4 live prompt injection attacks</strong> against this unguarded AI system.<br><br>
 The agents will leak <code>/etc/passwd</code>, <code>.env</code> secrets, and SSH keys — with <strong>zero authentication</strong>.<br><br>
-<strong>👇 Click the red button now — the tutorial continues automatically.</strong>`,
+<strong>👇 Click the Vulnerable Demo button now — the tutorial continues automatically.</strong>`,
       target: "#p4-navbar .p4-nav-btn.red",
       targetIndex: 0,
       waitForClick: true,
       spotlightClass: "red",
       arrowClass: "ard",
-      clickHint: "👆 Click the red button above — tour continues automatically",
+      clickHint: "👆 Click the Vulnerable Demo button above — tour continues automatically",
       clickHintStyle: "red",
     },
     {
@@ -327,17 +327,11 @@ Just click the <strong>🔗 GitHub Repo & Reports</strong> button on the navigat
       if (s.waitForClick) {
         const tgt = findTarget(s);
         if (tgt) {
-          const r = tgt.getBoundingClientRect();
-          const interceptor = document.createElement("div");
-          interceptor.style.cssText = `position:fixed;z-index:99999;cursor:pointer;left:${r.left-8}px;top:${r.top-8}px;width:${r.width+16}px;height:${r.height+16}px`;
-          document.body.appendChild(interceptor);
-          
           const handler = () => { 
             tgt.click();
             advance(); 
           };
-          interceptor.addEventListener("click", handler, { once: true });
-          removeClickInterceptor = () => interceptor.remove();
+          $id("p4int").onclick = handler;
         }
       }
     };
@@ -387,6 +381,13 @@ Just click the <strong>🔗 GitHub Repo & Reports</strong> button on the navigat
 
       cur.style.cssText += `;opacity:1;left:${r.left+r.width/2}px;top:${r.top+r.height/2}px`;
 
+      // Update Interceptor
+      if (s.waitForClick) {
+        $id("p4int").style.cssText = `position:fixed;z-index:99999;cursor:pointer;left:${r.left-8}px;top:${r.top-8}px;width:${r.width+16}px;height:${r.height+16}px;display:block`;
+      } else {
+        $id("p4int").style.display = "none";
+      }
+
       // Card: below or above
       const spaceBelow = vh - r.bottom - PAD;
       const cardH = 300;
@@ -402,6 +403,7 @@ Just click the <strong>🔗 GitHub Repo & Reports</strong> button on the navigat
       spt.style.opacity = "0";
       cur.style.opacity = "0";
       arr.style.opacity = "0";
+      $id("p4int").style.display = "none";
       card.style.cssText += `;top:80px;right:24px;left:auto;bottom:auto;transform:none`;
     }
   }
@@ -438,8 +440,9 @@ Just click the <strong>🔗 GitHub Repo & Reports</strong> button on the navigat
     const cursor = Object.assign(document.createElement("div"), { id: "p4cur" });
     const spotlight = Object.assign(document.createElement("div"), { id: "p4spt" });
     const arrow = Object.assign(document.createElement("div"), { id: "p4arr" });
+    const interceptor = Object.assign(document.createElement("div"), { id: "p4int" });
 
-    document.body.append(backdrop, spotlight, cursor, arrow, card);
+    document.body.append(backdrop, spotlight, cursor, arrow, card, interceptor);
 
     $id("p4next").onclick = advance;
     $id("p4prev").onclick = back;
@@ -447,7 +450,12 @@ Just click the <strong>🔗 GitHub Repo & Reports</strong> button on the navigat
     backdrop.onclick = destroy;
 
     document.addEventListener("keydown", onKey);
+    window.addEventListener("resize", handleResize);
     render(0);
+  }
+
+  function handleResize() {
+    if ($id("p4c")) position(STEPS[cur]);
   }
 
   function onKey(e) {
@@ -457,9 +465,9 @@ Just click the <strong>🔗 GitHub Repo & Reports</strong> button on the navigat
   }
 
   function destroy() {
-    if (removeClickInterceptor) { removeClickInterceptor(); removeClickInterceptor = null; }
     document.removeEventListener("keydown", onKey);
-    ["p4b","p4c","p4cur","p4spt","p4arr"].forEach(id => $id(id)?.remove());
+    window.removeEventListener("resize", handleResize);
+    ["p4b","p4c","p4cur","p4spt","p4arr","p4int"].forEach(id => $id(id)?.remove());
   }
 
   // ── Launch after Chainlit mounts ────────────────────────────────────────────

@@ -161,12 +161,18 @@ async def hitl_approve(operation: str, target: str, risk_level: RiskLevel, reaso
         actions=[
             cl.Action(name="approve", payload={"value": "approve"}, label="✅ Approve — Allow the agent"),
             cl.Action(name="deny",    payload={"value": "deny"},    label="❌ Deny — Block the agent"),
+            cl.Action(name="abort",   payload={"value": "abort"},   label="⏭️ Skip Rest of Demo"),
         ],
     ).send()
 
-    if res and res.get("payload", {}).get("value") == "approve":
+    val = res.get("payload", {}).get("value") if res else "deny"
+
+    if val == "approve":
         await cl.Message(content="✅ **You approved the request.** The agent will continue.").send()
         return True
+    elif val == "abort":
+        await cl.Message(content="⏭️ **Demo Aborted.** Skipping remaining attacks.").send()
+        return "abort"
     else:
         await cl.Message(
             content="🛑 **You denied the request.** The agent was blocked from accessing that resource."
@@ -251,13 +257,13 @@ async def on_chat_start():
         actions=[
             cl.Action(
                 name="redteam_demo",
-                label="🔴 Run Red Team Attack (Vulnerable)",
+                label="🔴 Run Vulnerable System Demo",
                 payload={"action": "redteam"},
                 tooltip="Run 4 attacks against the system WITHOUT security guardrails"
             ),
             cl.Action(
                 name="defence_demo",
-                label="🛡️ Run Defence Demo (Secured)",
+                label="🛡️ Run Secured System Demo",
                 payload={"action": "defence"},
                 tooltip="See the same 4 attacks run and get blocked by the security interceptor"
             ),
@@ -293,10 +299,9 @@ async def _run_redteam_demo():
 
     await cl.Message(
         content=(
-            "# 🔴 Red Team Attack Demo — Unguarded System\n\n"
-            "> ⚠️ **This version has NO security guardrails.** "
-            "The AI agents will execute any file operation they are told to — "
-            "no authentication, no confirmation, no limits.\n\n"
+            "## 🔴 Vulnerable System Demo\n\n"
+            "> This version is entirely **unguarded**. The agents will execute whatever "
+            "commands they receive, even if those commands are injected by a malicious user.\n\n"
             "**We will run 4 prompt injection attacks.** "
             "Watch what the attacker sends, what the agent does, and what gets leaked.\n\n"
             "---"
@@ -385,14 +390,14 @@ async def _run_redteam_demo():
     table = "## 🔴 Attack Results — Unguarded System\n\n| # | Attack | Verdict | What was exposed |\n|---|---|---|---|\n"
     for j, (name, verdict, detail) in enumerate(results_summary, 1):
         table += f"| {j} | {name} | {verdict} | {detail} |\n"
-    table += "\n---\n> **➡️ Click 'Run Defence Demo' below to see the Human-in-the-Loop defense block these exact attacks.**"
+    table += "\n---\n> **➡️ Click 'Run Secured System Demo' below to see the Human-in-the-Loop defense block these exact attacks.**"
     
     await cl.Message(
         content=table,
         actions=[
             cl.Action(
                 name="defence_demo",
-                label="🛡️ Run Defence Demo (Secured)",
+                label="🛡️ Run Secured System Demo",
                 payload={"action": "defence"}
             )
         ]
@@ -412,7 +417,7 @@ async def _run_defence_demo():
     # ── INTRO ────────────────────────────────────────────────────────────
     await cl.Message(
         content=(
-            "## 🛡️ Defence Demo — Security Interceptor in Action\n\n"
+            "## 🛡️ Secured System Demo — Security Interceptor in Action\n\n"
             "> This version has the **Security Interceptor active**. "
             "Every time an agent tries to access a sensitive resource, "
             "you will see exactly:\n"
@@ -480,7 +485,10 @@ async def _run_defence_demo():
         if not check.allowed:
             # ── Show: the HITL gate ───────────────────────────────────
             approved = await hitl_approve(check.operation, check.target, check.risk_level, check.reason)
-            if approved:
+            if approved == "abort":
+                results.append((attack_name, "⏭️ SKIPPED", check.risk_level.value, target))
+                break
+            elif approved:
                 results.append((attack_name, "⚠️ ALLOWED BY USER", check.risk_level.value, target))
                 await cl.Message(
                     content=(
