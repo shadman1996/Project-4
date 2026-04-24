@@ -11,32 +11,13 @@ A 7-agent AI research assistant system built with OpenClaw and Google Gemini, fe
 - **Secured Demo:** Runs the exact same attacks against a Human-in-the-Loop Security Interceptor, showing the attacks being blocked in real-time.
 - **Unified Web Interface:** A custom Top Navigation bar allows seamless switching between the demos and viewing the research report directly inside the app.
 
-## Deployment on Render / Railway
+## Live Deployment
 
-To deploy this project for free on Render or Railway, follow these steps:
+This project is already **live and deployed on Railway**. 
+- Any pushes to the `main` branch of this repository will automatically trigger a new deployment.
+- No further configuration is required on your end, as the environment variables (`GEMINI_API_KEY`) and `Procfile` are already configured.
 
-### Option A: Railway (Recommended)
-Railway is the easiest platform for this because it auto-detects Python and just works.
-1. Sign up for a free account at [railway.app](https://railway.app).
-2. Click **New Project** → **Deploy from GitHub repo**.
-3. Connect your GitHub and select this repository (`shadman1996/Project-4`).
-4. Add the following **Environment Variables** in the Railway dashboard:
-   - `GEMINI_API_KEY` = (your API key)
-   - `PORT` = `8000`
-5. Railway will automatically detect the `Procfile` and `requirements.txt` and deploy the app.
-
-### Option B: Render
-1. Sign up at [render.com](https://render.com).
-2. Click **New** → **Web Service** → Connect your GitHub repo.
-3. Configure the service:
-   - **Environment:** Python 3
-   - **Build Command:** `pip install -r requirements.txt`
-   - **Start Command:** `chainlit run app_secured.py --port $PORT --host 0.0.0.0`
-4. Add the **Environment Variable**:
-   - `GEMINI_API_KEY` = (your API key)
-5. Click **Create Web Service**.
-
-## Running Locally
+### Local Development Setup
 
 ```bash
 # 1. Setup virtual environment
@@ -49,11 +30,11 @@ cp .env.example .env
 # Edit .env and add your GEMINI_API_KEY
 
 # 3. Run Secured HITL Demo (Contains all web UI features)
-chainlit run app_secured.py
+chainlit run app.py
 ```
 
 ## Project Structure
-- `app_secured.py`: The main unified Chainlit dashboard containing both vulnerable and secured demos.
+- `app.py`: The main unified Chainlit dashboard containing both vulnerable and secured demos.
 - `src/`: Core agent logic, Pydantic schemas, and Gemini integration
 - `src/security/`: The Security Interceptor and HITL logic
 - `attacks/`: Prompt injection payloads used in the demo
