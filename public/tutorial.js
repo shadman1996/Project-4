@@ -6,7 +6,7 @@
 (function () {
   "use strict";
 
-  const KEY = "p4_tut_v4";
+  const KEY = "p4_tut_v5";
   if (localStorage.getItem(KEY)) return;
 
   // ── Inject CSS ──────────────────────────────────────────────────────────────
@@ -214,64 +214,75 @@ Click <strong>🚀 Launch Demo</strong> to start!`,
     return els[step.targetIndex || 0] || null;
   }
 
-  // ── Render step ─────────────────────────────────────────────────────────────
+  let activePoll = null;
+
   function render(idx) {
+    if (activePoll) { clearInterval(activePoll); activePoll = null; }
     const s = STEPS[idx];
 
-    // Clean up previous click interceptor
     if (removeClickInterceptor) { removeClickInterceptor(); removeClickInterceptor = null; }
 
-    // Badge / title / body
-    $id("p4badge").textContent = s.badge;
-    $id("p4ttl").textContent = s.title;
+    const applyRender = () => {
+      $id("p4badge").textContent = s.badge;
+      $id("p4ttl").textContent = s.title;
 
-    // Build body HTML with optional extra widget
-    let bodyHTML = s.body;
-    if (s.extra === "pipeline") bodyHTML += `<div class="p4pipe">${buildPipeline()}</div>`;
-    if (s.extra === "terminal") bodyHTML += buildTerminal(s.termCmd || "");
-    if (s.extra === "hitl")     bodyHTML += buildHITL();
-    $id("p4bdy").innerHTML = bodyHTML;
+      let bodyHTML = s.body;
+      if (s.extra === "pipeline") bodyHTML += `<div class="p4pipe">${buildPipeline()}</div>`;
+      if (s.extra === "terminal") bodyHTML += buildTerminal(s.termCmd || "");
+      if (s.extra === "hitl")     bodyHTML += buildHITL();
+      $id("p4bdy").innerHTML = bodyHTML;
 
-    // Wire copy button if present
-    const copyBtn = $id("p4copyBtn");
-    if (copyBtn && s.termCmd) {
-      copyBtn.onclick = () => {
-        navigator.clipboard.writeText(s.termCmd).catch(() => {});
-        copyBtn.textContent = "✅ Copied!";
-        setTimeout(() => { copyBtn.textContent = "📋 Copy Command"; }, 1800);
-      };
-    }
-
-    // Progress
-    $id("p4pf").style.width = `${Math.round(((idx + 1) / total) * 100)}%`;
-
-    // Next button label
-    $id("p4next").textContent = idx === total - 1 ? "🚀 Launch Demo" : "Next →";
-    $id("p4prev").disabled = idx === 0;
-
-    // Click hint
-    const hint = $id("p4hint");
-    if (s.clickHint) {
-      hint.textContent = s.clickHint;
-      hint.className = s.clickHintStyle === "red" ? "" : "blue";
-      hint.style.display = "block";
-      $id("p4next").disabled = true;
-    } else {
-      hint.style.display = "none";
-      $id("p4next").disabled = false;
-    }
-
-    // Position card / spotlight / cursor / arrow
-    position(s);
-
-    // Attach click interceptor for waitForClick steps
-    if (s.waitForClick) {
-      const tgt = findTarget(s);
-      if (tgt) {
-        const handler = () => { advance(); };
-        tgt.addEventListener("click", handler, { once: true });
-        removeClickInterceptor = () => tgt.removeEventListener("click", handler);
+      const copyBtn = $id("p4copyBtn");
+      if (copyBtn && s.termCmd) {
+        copyBtn.onclick = () => {
+          navigator.clipboard.writeText(s.termCmd).catch(() => {});
+          copyBtn.textContent = "✅ Copied!";
+          setTimeout(() => { copyBtn.textContent = "📋 Copy Command"; }, 1800);
+        };
       }
+
+      $id("p4pf").style.width = `${Math.round(((idx + 1) / total) * 100)}%`;
+      $id("p4next").textContent = idx === total - 1 ? "🚀 Launch Demo" : "Next →";
+      $id("p4prev").disabled = idx === 0;
+
+      const hint = $id("p4hint");
+      if (s.clickHint) {
+        hint.textContent = s.clickHint;
+        hint.className = s.clickHintStyle === "red" ? "" : "blue";
+        hint.style.display = "block";
+        $id("p4next").disabled = true;
+      } else {
+        hint.style.display = "none";
+        $id("p4next").disabled = false;
+      }
+
+      position(s);
+      $id("p4c").style.opacity = "1";
+
+      if (s.waitForClick) {
+        const tgt = findTarget(s);
+        if (tgt) {
+          const handler = () => { advance(); };
+          tgt.addEventListener("click", handler, { once: true });
+          removeClickInterceptor = () => tgt.removeEventListener("click", handler);
+        }
+      }
+    };
+
+    if (s.target && !findTarget(s)) {
+      $id("p4c").style.opacity = "0";
+      $id("p4spt").style.opacity = "0";
+      $id("p4cur").style.opacity = "0";
+      $id("p4arr").style.opacity = "0";
+      activePoll = setInterval(() => {
+        if (findTarget(s)) {
+          clearInterval(activePoll);
+          activePoll = null;
+          applyRender();
+        }
+      }, 100);
+    } else {
+      applyRender();
     }
   }
 
