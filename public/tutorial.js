@@ -65,12 +65,33 @@
   nav.innerHTML = `
     <button class="p4-nav-btn red" data-cmd="red team" title="Run 4 live prompt injection attacks against an unguarded AI system to see data get leaked">🔴 Vulnerable Demo</button>
     <button class="p4-nav-btn green" data-cmd="defence demo" title="Run the same 4 attacks against the system protected by a Human-in-the-Loop Security Interceptor">🛡️ Secured Demo</button>
+    <button class="p4-nav-btn" onclick="document.getElementById('theme-toggle')?.click()" title="Toggle Light/Dark Theme">🌓 Theme</button>
     <button class="p4-nav-btn" onclick="window.location.reload()" title="Clear chat history and start over">💬 New Chat</button>
     <button class="p4-nav-btn" id="p4-tut-btn" onclick="if(window.startP4Tutorial) window.startP4Tutorial()" title="Restart the Interactive Tutorial">🎓 Tutorial</button>
     <button class="p4-nav-btn" id="p4-readme-btn" title="View Instructions">📖 Readme</button>
     <button class="p4-nav-btn" onclick="window.open('https://github.com/shadman1996/Project-4', '_blank')" title="View source code and official CYBR 500 reports on GitHub">🔗 GitHub Repo</button>
   `;
   document.body.appendChild(nav);
+
+  // Capture phase listener to bypass Radix UI modal click traps
+  window.addEventListener("click", (e) => {
+    const rBtn = e.target.closest("#p4-readme-btn");
+    if (rBtn) {
+      if (rBtn.innerHTML.includes("Back")) {
+        // Forcefully close modal natively, or refresh
+        e.stopPropagation();
+        e.preventDefault();
+        const nativeClose = document.querySelector('[role="dialog"] button[aria-label="Close"], .MuiDialog-root button:first-of-type');
+        if (nativeClose) {
+          nativeClose.click();
+        } else {
+          window.location.href = '/';
+        }
+      } else {
+        document.getElementById('readme-button')?.click();
+      }
+    }
+  }, true);
 
   setInterval(() => {
     const isReadme = window.location.pathname.includes('/readme') || document.querySelector('.readme') !== null;
@@ -83,12 +104,6 @@
     if (rBtn) {
       if (isReadme) {
         rBtn.innerHTML = "🔙 Back to Chat";
-        rBtn.onclick = () => {
-          // Dispatch Escape to safely close the native Chainlit modal
-          document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', bubbles: true }));
-          // Fallback if modal doesn't close
-          setTimeout(() => { if (document.querySelector('.readme')) window.location.href = '/'; }, 300);
-        };
         rBtn.style.background = "rgba(99, 102, 241, 0.2)";
         if (tBtn) { tBtn.style.opacity = "0.3"; tBtn.style.pointerEvents = "none"; }
         if (c) c.style.display = "none";
@@ -96,7 +111,6 @@
         if (arr) arr.style.display = "none";
       } else {
         rBtn.innerHTML = "📖 Readme";
-        rBtn.onclick = () => document.getElementById('readme-button')?.click();
         rBtn.style.background = "";
         if (tBtn) { tBtn.style.opacity = "1"; tBtn.style.pointerEvents = "auto"; }
         if (c) c.style.display = "block";
