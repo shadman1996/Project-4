@@ -37,8 +37,7 @@
   nav.innerHTML = `
     <button class="p4-nav-btn red" data-cmd="red team" title="Run 4 live prompt injection attacks against an unguarded AI system to see data get leaked">🔴 Vulnerable Demo</button>
     <button class="p4-nav-btn green" data-cmd="defence demo" title="Run the same 4 attacks against the system protected by a Human-in-the-Loop Security Interceptor">🛡️ Secured Demo</button>
-    <button class="p4-nav-btn" data-cmd="/show_report" title="Read the final CYBR 500 Conference Report covering the threat model and mitigation results">📄 Research Report</button>
-    <button class="p4-nav-btn" onclick="window.open('https://github.com/shadman1996/Project-4', '_blank')" title="View source code on GitHub">🔗 GitHub Repo</button>
+    <button class="p4-nav-btn" onclick="window.open('https://github.com/shadman1996/Project-4', '_blank')" title="View source code and official CYBR 500 reports on GitHub">🔗 GitHub Repo & Reports</button>
   `;
   document.body.appendChild(nav);
 
@@ -189,26 +188,15 @@ This version has a Human-in-the-Loop security gate protecting it.<br><br>
       extra: "hitl",
     },
     {
-      badge: "Step 5 of 6",
-      title: "📄 The Research Report",
-      body: `You can instantly load the <strong>full CYBR 500 conference report</strong> or the <strong>Architecture Flow Diagrams</strong> right into the dashboard.<br><br>
-Just click these buttons on the navigation bar!`,
+      badge: "Step 5 of 5",
+      title: "📄 Official Reports & Code",
+      body: `Your professor can find the <strong>fully populated CYBR 500 Conference Report (.docx)</strong>, instructions, and all source code directly in the GitHub repository.<br><br>
+Just click the <strong>🔗 GitHub Repo & Reports</strong> button on the navigation bar!`,
       target: "#p4-navbar button:nth-child(3)",
       targetIndex: 0,
       waitForClick: false,
       arrowClass: "au",
-    },
-    {
-      badge: "Step 6 of 6",
-      title: "⌨️ Ask Your Own Question",
-      body: `The chat input below lets you run the <strong>full 7-agent research pipeline</strong> on any topic.<br><br>
-Try: <em>"What are the top prompt injection defenses?"</em><br><br>
-Click <strong>🚀 Launch Demo</strong> to start!`,
-      target: "textarea",
-      targetIndex: 0,
-      waitForClick: false,
-      arrowClass: "au",
-    },
+    }
   ];
 
   const total = STEPS.length;

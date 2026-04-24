@@ -4,10 +4,17 @@
 **Author:** Shadman  
 **Date:** April 2026  
 
+## For the Professor / Grading
+All official documentation required for the CYBR 500 Project 4 submission can be found in the **[`docs/`](./docs)** folder of this repository:
+1. `CYBR500_Prj4_Conference_Report_Template_April17.docx` (The fully populated 15-section final report with AI-Assisted Learning Appendix)
+2. `CYBR500_Project4_Instruction_handout_April17.docx` (Reference Instructions)
+3. `prj4_resources.docx` (Reference Resources)
+
 A 7-agent AI research assistant system built with OpenClaw and Google Gemini, featuring a Chainlit dashboard. This project demonstrates 4 live prompt injection attacks against an unguarded AI pipeline, followed by a secured version demonstrating a Human-in-the-Loop (HITL) Security Interceptor.
 
 ## Features
-- **Vulnerable Demo:** Runs 4 live prompt injection attacks, demonstrating how an unguarded agent can leak `/etc/passwd`.
+- **Live Agent Pipeline:** Run a full 7-agent academic research pipeline (Coordinator, Search, Verifier, Ranker, Synthesis, Data).
+- **Vulnerable Demo:** Run 4 live prompt injection attacks to see agents leak `/etc/passwd` and system secrets.
 - **Secured Demo:** Runs the exact same attacks against a Human-in-the-Loop Security Interceptor, showing the attacks being blocked in real-time.
 - **Unified Web Interface:** A custom Top Navigation bar allows seamless switching between the demos and viewing the research report directly inside the app.
 

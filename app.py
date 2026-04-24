@@ -553,34 +553,6 @@ async def on_message(message: cl.Message):
         await _run_redteam_demo()
         return
         
-    # Handle Navbar hidden commands
-    if low == "/show_report":
-        try:
-            with open(os.path.join(_PROJECT_ROOT, "report", "project4_report.md"), "r") as f:
-                content = f.read()
-            await cl.Message(content=content).send()
-        except Exception as e:
-            await cl.Message(content=f"Error loading report: {e}").send()
-        return
-        
-    if low == "/show_diagrams":
-        try:
-            with open(os.path.join(_PROJECT_ROOT, "report", "flow_diagrams.md"), "r") as f:
-                content = f.read()
-            await cl.Message(content=content).send()
-        except Exception as e:
-            await cl.Message(content=f"Error loading diagrams: {e}").send()
-        return
-
-    if low == "/show_readme":
-        try:
-            with open(os.path.join(_PROJECT_ROOT, "README.md"), "r") as f:
-                content = f.read()
-            await cl.Message(content=content).send()
-        except Exception as e:
-            await cl.Message(content=f"Error loading README: {e}").send()
-        return
-
     global _SECURITY_ENABLED
     _SECURITY_ENABLED = True  # Ensure security is active for regular chat
 
