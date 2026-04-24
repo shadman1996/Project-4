@@ -36,8 +36,13 @@
     /* Push chainlit body down slightly so navbar doesn't cover header */
     #root { padding-top: 50px !important; height: 100vh !important; box-sizing: border-box !important; }
 
-    /* Hide Chainlit's default header to avoid duplicates */
-    .cl-header, header { display: none !important; }
+    /* Hide specific native buttons to avoid duplicates, but keep header for navigation */
+    .cl-header button[id="new-chat-button"],
+    .cl-header button[id="readme-button"],
+    .cl-header button[id="theme-toggle"] { display: none !important; }
+
+    /* Make Chainlit header sleek and compact */
+    .cl-header { height: 40px !important; min-height: 40px !important; border-bottom: none !important; }
 
     /* Light Mode Overrides for Navbar */
     [data-theme="light"] #p4-navbar, .light #p4-navbar {
@@ -62,6 +67,7 @@
     <button class="p4-nav-btn" onclick="document.getElementById('readme-button')?.click()" title="View Instructions">📖 Readme</button>
     <button class="p4-nav-btn" onclick="document.getElementById('theme-toggle')?.click()" title="Toggle Light/Dark Theme">🌓 Theme</button>
     <button class="p4-nav-btn" onclick="window.location.reload()" title="Clear chat history and start over">💬 New Chat</button>
+    <button class="p4-nav-btn" onclick="window.location.href='/'" title="Return to Chat Interface">🔙 Back to Chat</button>
     <button class="p4-nav-btn" onclick="window.open('https://github.com/shadman1996/Project-4', '_blank')" title="View source code and official CYBR 500 reports on GitHub">🔗 GitHub Repo</button>
     <button class="p4-nav-btn" onclick="if(window.startP4Tutorial) window.startP4Tutorial()" title="Restart the Interactive Tutorial">🎓 Tutorial</button>
   `;

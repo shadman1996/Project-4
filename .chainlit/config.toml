@@ -99,6 +99,9 @@ name = "AI Security Research System"
 
 default_theme = "dark"
 
+# Disable showing the readme automatically on first page load
+show_readme_as_default = false
+
 # Description shown in HTML meta tags
 description = "7-Agent AI Research System with Red-Team Attack & HITL Security Defense — CYBR 500 Project 4"
 
