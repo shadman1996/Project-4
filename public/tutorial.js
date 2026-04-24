@@ -465,4 +465,15 @@ Just click the <strong>🔗 GitHub Repo & Reports</strong> button on the navigat
     if (ready) { clearInterval(poll); setTimeout(init, 900); }
   }, 200);
 
+  // ── Hack to hide "System" from the theme dropdown ───────────────────────────
+  document.addEventListener("click", () => {
+    setTimeout(() => {
+      document.querySelectorAll("li[role='menuitem']").forEach(el => {
+        if(el.textContent.trim() === "System") {
+          el.style.display = "none";
+        }
+      });
+    }, 50);
+  });
+
 })();
