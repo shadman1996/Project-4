@@ -83,7 +83,8 @@
   // ── Inject CSS ──────────────────────────────────────────────────────────────
   const style = document.createElement("style");
   style.textContent = `
-  #p4b{position:fixed;inset:0;z-index:9988;background:rgba(5,10,22,.55);backdrop-filter:blur(2px);animation:p4fi .4s ease both}
+  #p4b{position:fixed;inset:0;z-index:9988;background:rgba(5,10,22,.10);animation:p4fi .4s ease both}
+  #p4spt{position:fixed;z-index:9989;border-radius:8px;box-shadow:0 0 0 9999px rgba(5,10,22,.20);transition:all .4s ease;pointer-events:none}
   @keyframes p4fi{from{opacity:0}to{opacity:1}}
   #p4c{position:fixed;z-index:9999;background:rgba(9,16,36,.93);border:1px solid rgba(99,102,241,.5);border-radius:20px;padding:1.5rem 1.7rem 1.3rem;max-width:370px;width:91vw;box-shadow:0 0 80px rgba(99,102,241,.18),0 20px 60px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.06);font-family:'Inter',system-ui,sans-serif;color:#e2e8f0;transition:top .42s cubic-bezier(.4,0,.2,1),left .42s cubic-bezier(.4,0,.2,1),bottom .42s cubic-bezier(.4,0,.2,1)}
   #p4badge{display:inline-block;background:linear-gradient(90deg,#6366f1,#00d4ff);color:#fff;font-size:.63rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:.18em .72em;border-radius:99px;margin-bottom:.65rem}
