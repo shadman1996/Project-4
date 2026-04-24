@@ -42,6 +42,12 @@
     .cl-header button[id="readme-button"],
     .cl-header button[id="theme-toggle"] { display: none !important; }
 
+    /* Dynamic Theme Toggle Icons */
+    .sun-icon { display: none; }
+    .moon-icon { display: inline; }
+    [data-theme="light"] .moon-icon, .light .moon-icon { display: none !important; }
+    [data-theme="light"] .sun-icon, .light .sun-icon { display: inline !important; }
+
     /* Make Chainlit header sleek and compact */
     .cl-header { height: 40px !important; min-height: 40px !important; border-bottom: none !important; }
 
@@ -65,13 +71,41 @@
   nav.innerHTML = `
     <button class="p4-nav-btn red" data-cmd="red team" title="Run 4 live prompt injection attacks against an unguarded AI system to see data get leaked">🔴 Vulnerable Demo</button>
     <button class="p4-nav-btn green" data-cmd="defence demo" title="Run the same 4 attacks against the system protected by a Human-in-the-Loop Security Interceptor">🛡️ Secured Demo</button>
-    <button class="p4-nav-btn" onclick="document.getElementById('theme-toggle')?.click()" title="Toggle Light/Dark Theme">🌓 Theme</button>
     <button class="p4-nav-btn" onclick="window.location.reload()" title="Clear chat history and start over">💬 New Chat</button>
     <button class="p4-nav-btn" id="p4-tut-btn" onclick="if(window.startP4Tutorial) window.startP4Tutorial()" title="Restart the Interactive Tutorial">🎓 Tutorial</button>
     <button class="p4-nav-btn" id="p4-readme-btn" title="View Instructions">📖 Readme</button>
+    <button class="p4-nav-btn" id="p4-theme-btn" onclick="document.getElementById('theme-toggle')?.click()" title="Toggle Light/Dark Theme">
+      <span class="moon-icon">🌙 Dark</span><span class="sun-icon">☀️ Light</span>
+    </button>
     <button class="p4-nav-btn" onclick="window.open('https://github.com/shadman1996/Project-4', '_blank')" title="View source code and official CYBR 500 reports on GitHub">🔗 GitHub Repo</button>
   `;
   document.body.appendChild(nav);
+
+  // Auto-fade the initial Readme screen (the intro screen)
+  let hasAutoFaded = false;
+  const introFadeInterval = setInterval(() => {
+    if (hasAutoFaded) {
+      clearInterval(introFadeInterval);
+      return;
+    }
+    const dialog = document.querySelector('[role="dialog"], .MuiDialog-root');
+    const closeBtn = document.querySelector('[role="dialog"] button[aria-label="Close"], .MuiDialog-root button:first-of-type');
+    
+    // Only fade if the dialog exists and we haven't clicked a navbar button manually
+    if (dialog && closeBtn) {
+      hasAutoFaded = true; 
+      setTimeout(() => {
+        dialog.style.transition = "opacity 1.5s ease-out";
+        dialog.style.opacity = "0";
+        setTimeout(() => {
+          closeBtn.click();
+          dialog.style.opacity = "1"; // Reset for future manual opens
+        }, 1500);
+      }, 5000); // Wait 5 seconds before fading
+    }
+  }, 500);
+
+  nav.addEventListener("click", () => { hasAutoFaded = true; }, { once: true });
 
   // Capture phase listener to bypass Radix UI modal click traps
   window.addEventListener("click", (e) => {
@@ -94,7 +128,9 @@
   }, true);
 
   setInterval(() => {
-    const isReadme = window.location.pathname.includes('/readme') || document.querySelector('.readme') !== null;
+    // Chainlit uses a Radix UI Dialog or MUI Dialog for the Readme modal
+    const isReadme = window.location.pathname.includes('/readme') || document.querySelector('[role="dialog"]') !== null || document.querySelector('.MuiDialog-root') !== null;
+    
     const rBtn = document.getElementById("p4-readme-btn");
     const tBtn = document.getElementById("p4-tut-btn");
     const c = document.getElementById("p4c");

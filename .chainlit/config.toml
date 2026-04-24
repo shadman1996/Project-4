@@ -99,8 +99,8 @@ name = "AI Security Research System"
 
 default_theme = "dark"
 
-# Disable showing the readme automatically on first page load
-show_readme_as_default = false
+# Enable showing the readme automatically on first page load so it can auto-fade
+show_readme_as_default = true
 
 # Description shown in HTML meta tags
 description = "7-Agent AI Research System with Red-Team Attack & HITL Security Defense — CYBR 500 Project 4"
@@ -112,7 +112,7 @@ cot = "full"
 custom_css = "/public/style.css"
 
 # Custom logo (shield + neural network)
-logo_file_url = "/public/logo_secured.png"
+logo_file_url = "/public/logo_classy.png"
 
 # Specify additional attributes for a custom CSS file
 # custom_css_attributes = "media=\"print\""
