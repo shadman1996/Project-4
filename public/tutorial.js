@@ -139,7 +139,7 @@
     {
       badge: "Welcome",
       title: "👋 Welcome to Project 4",
-      body: `A <strong>live AI security demo</strong> built for CYBR 500.<br><br>
+      body: `A <strong>Graduate-Level Academic Research Pipeline</strong> and live AI security demo built for CYBR 500.<br><br>
 You'll see a <strong>7-agent AI pipeline</strong> get attacked by prompt injection — then a security interceptor block every attack in real time.<br><br>
 Use <strong>← →</strong> keys or buttons to navigate. Let's go!`,
       target: null, waitForClick: false,
