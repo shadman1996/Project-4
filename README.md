@@ -1,7 +1,7 @@
 # Securing AI Agent Ecosystems
 
 **CYBR 500 — Advanced Cybersecurity Research**  
-**Author:** Shadman  
+**Author:** Shadman Ahsan  
 **Date:** April 2026  
 
 ## For the Professor / Grading
@@ -45,6 +45,5 @@ chainlit run app.py
 - `src/`: Core agent logic, Pydantic schemas, and Gemini integration
 - `src/security/`: The Security Interceptor and HITL logic
 - `attacks/`: Prompt injection payloads used in the demo
-- `report/`: The final CYBR 500 conference-style research paper
-- `docs/`: Reference documents and templates provided for the CYBR 500 course
+- `report/`: The final CYBR 500 conference-style research paper and grading deliverables
 - `public/`: Custom JavaScript (Top Navbar injection) and CSS
