@@ -83,7 +83,7 @@
   // ── Inject CSS ──────────────────────────────────────────────────────────────
   const style = document.createElement("style");
   style.textContent = `
-  #p4b{position:fixed;inset:0;z-index:9988;background:transparent;animation:p4fi .4s ease both}
+  #p4b{position:fixed;inset:0;z-index:9988;background:transparent;pointer-events:none;animation:p4fi .4s ease both}
   #p4spt{position:fixed;z-index:9989;border-radius:8px;box-shadow:0 0 0 9999px rgba(5,10,22,.65);transition:all .4s ease;pointer-events:none}
   @keyframes p4fi{from{opacity:0}to{opacity:1}}
   #p4c{position:fixed;z-index:9999;background:rgba(9,16,36,.93);border:1px solid rgba(99,102,241,.5);border-radius:20px;padding:1.5rem 1.7rem 1.3rem;max-width:370px;width:91vw;box-shadow:0 0 80px rgba(99,102,241,.18),0 20px 60px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.06);font-family:'Inter',system-ui,sans-serif;color:#e2e8f0;transition:top .42s cubic-bezier(.4,0,.2,1),left .42s cubic-bezier(.4,0,.2,1),bottom .42s cubic-bezier(.4,0,.2,1)}
@@ -447,11 +447,46 @@ Just click the <strong>🔗 GitHub Repo & Reports</strong> button on the navigat
     $id("p4next").onclick = advance;
     $id("p4prev").onclick = back;
     $id("p4skip").onclick = destroy;
-    backdrop.onclick = destroy;
 
     document.addEventListener("keydown", onKey);
     window.addEventListener("resize", handleResize);
     render(0);
+    makeDraggable(card);
+  }
+
+  function makeDraggable(el) {
+    let isDown = false, startX, startY, startLeft, startTop;
+    el.style.cursor = "grab";
+    
+    el.addEventListener("mousedown", (e) => {
+      if (e.target.tagName === "BUTTON") return;
+      isDown = true;
+      el.style.cursor = "grabbing";
+      el.style.transition = "none";
+      startX = e.clientX;
+      startY = e.clientY;
+      const rect = el.getBoundingClientRect();
+      startLeft = rect.left;
+      startTop = rect.top;
+    });
+
+    window.addEventListener("mousemove", (e) => {
+      if (!isDown) return;
+      e.preventDefault();
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+      el.style.left = startLeft + dx + "px";
+      el.style.top = startTop + dy + "px";
+      el.style.right = "auto";
+      el.style.bottom = "auto";
+      el.style.transform = "none";
+    });
+
+    window.addEventListener("mouseup", () => {
+      isDown = false;
+      el.style.cursor = "grab";
+      el.style.transition = "top .42s cubic-bezier(.4,0,.2,1), left .42s cubic-bezier(.4,0,.2,1)";
+    });
   }
 
   function handleResize() {
