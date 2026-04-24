@@ -151,10 +151,9 @@ async def hitl_approve(operation: str, target: str, risk_level: RiskLevel, reaso
     alert_content = (
         f"### 🛡️ Security Alert — {risk_label}\n\n"
         f"An AI agent is trying to **{operation}** a sensitive file or resource.\n\n"
-        f"| Detail | Value |\n|---|---|\n"
-        f"| **What it wants to access** | `{target}` |\n"
-        f"| **Why it was flagged** | {reason} |\n\n"
-        f"**Should the agent be allowed to do this?**"
+        f"> 🎯 **Target:** `{target}`\n"
+        f"> ⚠️ **Reason Flagged:** {reason}\n\n"
+        f"**Should the agent be allowed to proceed?**"
     )
 
     res = await cl.AskActionMessage(
@@ -491,16 +490,15 @@ async def _run_defence_demo():
                     )
                 ).send()
             else:
-                # ── Show: blocked result ──────────────────────────────
+                # ── Show: blocked result ──────────────
                 await cl.Message(
                     content=(
                         f"### 🛑 BLOCKED — Attack {i} Stopped\n\n"
                         f"The Security Interceptor blocked access to `{target}`.\n\n"
-                        f"| Detail | Value |\n|---|---|\n"
-                        f"| **Risk level** | {check.risk_level.value} |\n"
-                        f"| **Block reason** | {check.reason} |\n"
-                        f"| **Data protected** | `{target}` was never read |\n\n"
-                        f"> ✅ Nothing was leaked. The agent received an error response instead."
+                        f"> 🛡️ **Risk Level:** {check.risk_level.value}\n"
+                        f"> 🔒 **Block Reason:** {check.reason}\n"
+                        f"> ✅ **Status:** `{target}` was never read\n\n"
+                        f"**Result:** Nothing was leaked. The agent received an error response instead."
                     )
                 ).send()
                 results.append((attack_name, "🛑 BLOCKED", check.risk_level.value, target))
