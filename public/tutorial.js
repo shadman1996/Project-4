@@ -152,7 +152,7 @@ Use <strong>← →</strong> keys or buttons to navigate. Let's go!`,
       body: `This button runs <strong>4 live prompt injection attacks</strong> against this unguarded AI system.<br><br>
 The agents will leak <code>/etc/passwd</code>, <code>.env</code> secrets, and SSH keys — with <strong>zero authentication</strong>.<br><br>
 <strong>👇 Click the red button now — the tutorial continues automatically.</strong>`,
-      target: ".cl-action-button, button[class*='action']",
+      target: "#p4-navbar .p4-nav-btn.red",
       targetIndex: 0,
       waitForClick: true,
       spotlightClass: "red",
@@ -163,7 +163,7 @@ The agents will leak <code>/etc/passwd</code>, <code>.env</code> secrets, and SS
     {
       badge: "Step 2 of 6",
       title: "⚡ The Agent Pipeline — Live",
-      body: `Watch the <strong>attack messages</strong> appearing above ☝️<br><br>
+      body: `Watch the <strong>attack messages</strong> appearing in the chat.<br><br>
 Each block shows exactly: what was injected → what the agent did → what got leaked.<br><br>
 The agents pass results to each other in real time:`,
       target: null, waitForClick: false,
@@ -171,40 +171,44 @@ The agents pass results to each other in real time:`,
     },
     {
       badge: "Step 3 of 6",
-      title: "⌨️ Ask Your Own Question",
-      body: `The chat input below lets you run the <strong>full 7-agent research pipeline</strong> on any topic.<br><br>
-Try: <em>"What are the top prompt injection defenses?"</em><br><br>
-Every agent's output appears as a <strong>collapsible step</strong> — click any step to expand it.`,
-      target: "textarea",
+      title: "🛡️ The Defence Demo",
+      body: `You can also run the <strong>Secured System</strong> using the 🛡️ button on the top navigation bar.<br><br>
+This version has a Human-in-the-Loop security gate protecting it.<br><br>
+<strong>👇 Click the green Secured Demo button now.</strong>`,
+      target: "#p4-navbar .p4-nav-btn.green",
       targetIndex: 0,
-      waitForClick: false,
+      waitForClick: true,
       arrowClass: "au",
+      clickHint: "👆 Click the Secured Demo button to continue",
+      clickHintStyle: "blue",
     },
     {
       badge: "Step 4 of 6",
-      title: "🛡️ The Defence Demo",
-      body: `You can also run the <strong>Secured System</strong> using the 🛡️ button.<br><br>
-This version has a Human-in-the-Loop security gate:`,
+      title: "🚨 The HITL Security Gate",
+      body: `When the interceptor is active, every dangerous agent action triggers a <strong>Security Alert</strong> in the chat. You decide: allow or block.`,
       target: null, waitForClick: false,
       extra: "hitl",
     },
     {
       badge: "Step 5 of 6",
-      title: "🚨 The HITL Security Gate",
-      body: `When the interceptor is active, every dangerous agent action triggers this <strong>Security Alert</strong>. You decide: allow or block.`,
-      target: null, waitForClick: false,
-      extra: "hitl",
+      title: "📄 The Research Report",
+      body: `You can instantly load the <strong>full CYBR 500 conference report</strong> or the <strong>Architecture Flow Diagrams</strong> right into the dashboard.<br><br>
+Just click these buttons on the navigation bar!`,
+      target: "#p4-navbar button:nth-child(3)",
+      targetIndex: 0,
+      waitForClick: false,
+      arrowClass: "au",
     },
     {
       badge: "Step 6 of 6",
-      title: "✅ You're Ready!",
-      body: `<strong>Cheat sheet:</strong><br>
-🔴 <em>Red button</em> → 4 live prompt injection attacks<br>
-🛡️ <em>Shield button</em> → See attacks getting blocked<br>
-🔬 <em>Microscope button</em> → Safe 7-agent research demo<br>
-💬 <em>Chat box</em> → Ask your own security question<br><br>
+      title: "⌨️ Ask Your Own Question",
+      body: `The chat input below lets you run the <strong>full 7-agent research pipeline</strong> on any topic.<br><br>
+Try: <em>"What are the top prompt injection defenses?"</em><br><br>
 Click <strong>🚀 Launch Demo</strong> to start!`,
-      target: null, waitForClick: false,
+      target: "textarea",
+      targetIndex: 0,
+      waitForClick: false,
+      arrowClass: "au",
     },
   ];
 
