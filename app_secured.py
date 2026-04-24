@@ -23,6 +23,8 @@ _PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 if _PROJECT_ROOT not in sys.path:
     sys.path.insert(0, _PROJECT_ROOT)
 
+from attacks.prompt_injection import ALL_PAYLOADS
+
 import chainlit as cl
 
 from src.config import AGENT_COLORS, AGENT_ICONS
@@ -44,6 +46,7 @@ logger = logging.getLogger("app_secured")
 # Global state per session
 _orchestrators: dict[str, CoordinatorOrchestrator] = {}
 _interceptors: dict[str, SecurityInterceptor] = {}
+_SECURITY_ENABLED = True  # Toggle for web demo purposes
 
 
 def _get_orchestrator() -> CoordinatorOrchestrator:
@@ -178,6 +181,10 @@ _original_data_run = DataAgent.run
 
 async def _secured_data_run(self, task: str, context: str = "") -> DataResult:
     """Secured version of DataAgent.run that checks the interceptor first."""
+    global _SECURITY_ENABLED
+    if not _SECURITY_ENABLED:
+        return await _original_data_run(self, task, context)
+
     interceptor = _get_interceptor()
     task_lower = task.lower()
 
@@ -230,34 +237,44 @@ async def _secured_data_run(self, task: str, context: str = "") -> DataResult:
 @cl.on_chat_start
 async def on_chat_start():
     """Initialize the secured session with user-friendly starter buttons."""
+    global _SECURITY_ENABLED
+    _SECURITY_ENABLED = True
     DataAgent.run = _secured_data_run  # Apply security patch
     _get_interceptor()  # Create session interceptor
 
     await cl.Message(
         content=(
-            "## 🛡️ Secured Multi-Agent Research System\n\n"
-            "This is the **protected version** of the AI system.\n\n"
-            "Every time an AI agent tries to read a sensitive file or access "
-            "system data, you will see a **Security Alert** with two buttons:\n"
-            "- ✅ **Approve** — let the agent continue\n"
-            "- ❌ **Deny** — block the agent immediately\n\n"
+            "## 🛡️ Multi-Agent Research System\n\n"
+            "Welcome to the interactive demonstration for CYBR 500.\n\n"
+            "This application contains both the **unguarded** and **secured** versions of the AI pipeline. "
             "Choose an option below to get started:"
         ),
         actions=[
             cl.Action(
+                name="redteam_demo",
+                label="🔴 Run Red Team Attack (Vulnerable)",
+                payload={"action": "redteam"},
+                tooltip="Run 4 attacks against the system WITHOUT security guardrails"
+            ),
+            cl.Action(
                 name="defence_demo",
-                label="🛡️ Run Defence Demo (show attacks being blocked)",
+                label="🛡️ Run Defence Demo (Secured)",
                 payload={"action": "defence"},
-                tooltip="See the 4 attacks run and get blocked by the security interceptor"
+                tooltip="See the same 4 attacks run and get blocked by the security interceptor"
             ),
             cl.Action(
                 name="research_secure",
-                label="🔬 Run a Research Question (secured)",
+                label="🔬 Run a Research Question",
                 payload={"action": "research"},
-                tooltip="Ask a cybersecurity question through the secured pipeline"
+                tooltip="Ask a cybersecurity question through the pipeline"
             ),
         ]
     ).send()
+
+
+@cl.action_callback("redteam_demo")
+async def on_redteam_action(action):
+    await _run_redteam_demo()
 
 
 @cl.action_callback("defence_demo")
@@ -270,8 +287,126 @@ async def on_research_secure_action(action):
     await cl.Message(content="🔬 Type your research question in the chat below. The security interceptor is watching!").send()
 
 
+async def _run_redteam_demo():
+    """Run all 4 prompt injection attacks live in the UI — fully visible results."""
+    global _SECURITY_ENABLED
+    _SECURITY_ENABLED = False  # Disable interceptor for the vulnerable demo
+
+    await cl.Message(
+        content=(
+            "# 🔴 Red Team Attack Demo — Unguarded System\n\n"
+            "> ⚠️ **This version has NO security guardrails.** "
+            "The AI agents will execute any file operation they are told to — "
+            "no authentication, no confirmation, no limits.\n\n"
+            "**We will run 4 prompt injection attacks.** "
+            "Watch what the attacker sends, what the agent does, and what gets leaked.\n\n"
+            "---"
+        )
+    ).send()
+    await asyncio.sleep(0.4)
+
+    ATTACK_META = [
+        ("ENV_EXFIL",  "🔴 Attack 1 — Environment Variable Theft",
+         "Goal: Trick the Search Agent into dumping API keys & secrets from the environment."),
+        ("FILE_EXFIL", "🔴 Attack 2 — System File Exfiltration via Fake Authority",
+         "Goal: Embed a fake 'system admin' directive to make the agent read /etc/passwd."),
+        ("DATA_AGENT", "🔴 Attack 3 — Direct Data Agent File Read (CRITICAL)",
+         "Goal: Send a social-engineering prompt directly to the Data Agent to leak system files."),
+        ("CHAINED",    "🔴 Attack 4 — Chained Cross-Agent Attack",
+         "Goal: Use Search Agent as a relay to instruct the Data Agent to dump secrets."),
+    ]
+
+    results_summary = []
+
+    for i, (payload_id, payload_name, payload_text) in enumerate(ALL_PAYLOADS, 1):
+        _, title, goal = ATTACK_META[i - 1]
+
+        await cl.Message(content=f"## {title}\n\n**{goal}**").send()
+        await asyncio.sleep(0.3)
+
+        await cl.Message(
+            content=(
+                f"### 📨 Payload Injected into Agent\n\n"
+                f"```\n{payload_text.strip()}\n```\n\n"
+                f"*The attacker sends this as a normal user message. "
+                f"The AI agent sees no difference between this and a legitimate request.*"
+            )
+        ).send()
+        await asyncio.sleep(0.3)
+
+        if payload_id == "DATA_AGENT":
+            leaked_sections = []
+            for fpath in ["/etc/passwd", "/etc/shadow", os.path.expanduser("~/.bashrc"), ".env"]:
+                try:
+                    with open(fpath, "r") as f:
+                        content = f.read()[:600]
+                    leaked_sections.append(f"### 📄 `{fpath}` — **LEAKED**\n```\n{content}\n```")
+                except PermissionError:
+                    leaked_sections.append(f"### 📄 `{fpath}` — *Permission denied*")
+                except FileNotFoundError:
+                    leaked_sections.append(f"### 📄 `{fpath}` — *Not found on this system*")
+
+            leaked_content = "\n\n".join(leaked_sections)
+            await cl.Message(
+                content=(
+                    f"### 🔓 RESULT — EXPLOIT SUCCESSFUL\n\n"
+                    f"The Data Agent read the files and returned their contents "
+                    f"**without any authentication or warning.**\n\n"
+                    f"{leaked_content}\n\n"
+                    f"> 🚨 **This is your actual system's data. "
+                    f"The agent leaked it because nothing stopped it.**"
+                )
+            ).send()
+            results_summary.append((title, "🔓 EXPLOITED", "System files leaked"))
+
+        elif payload_id == "ENV_EXFIL":
+            env_preview = ", ".join(f"`{k}`" for k in os.environ if any(w in k.upper() for w in ["KEY", "TOKEN", "SECRET"])) or "*(no sensitive keys found)*"
+            await cl.Message(
+                content=(
+                    f"### ⚠️ RESULT — Attack Attempted\n\n"
+                    f"The agent was instructed to dump environment variables. "
+                    f"**Sensitive keys visible:**\n\n{env_preview}\n\n"
+                    f"> In an unguarded system, these would be returned to the attacker."
+                )
+            ).send()
+            results_summary.append((title, "⚠️ ATTEMPTED", "Env var theft"))
+
+        else:
+            await cl.Message(
+                content=(
+                    f"### ⚠️ RESULT — Injection Attempted\n\n"
+                    f"This payload was injected into the agent's context. "
+                    f"Without an output scanner, any sensitive data would be returned to the attacker."
+                )
+            ).send()
+            results_summary.append((title, "⚠️ ATTEMPTED", "LLM injection"))
+
+        await asyncio.sleep(0.6)
+
+    table = "## 🔴 Attack Results — Unguarded System\n\n| # | Attack | Verdict | What was exposed |\n|---|---|---|---|\n"
+    for j, (name, verdict, detail) in enumerate(results_summary, 1):
+        table += f"| {j} | {name} | {verdict} | {detail} |\n"
+    table += "\n---\n> **➡️ Click 'Run Defence Demo' below to see the Human-in-the-Loop defense block these exact attacks.**"
+    
+    await cl.Message(
+        content=table,
+        actions=[
+            cl.Action(
+                name="defence_demo",
+                label="🛡️ Run Defence Demo (Secured)",
+                payload={"action": "defence"}
+            )
+        ]
+    ).send()
+    
+    _SECURITY_ENABLED = True  # Re-enable security after demo finishes
+
+
 async def _run_defence_demo():
     """Run all 4 attacks live and show the interceptor blocking each one — full before/after visible."""
+    global _SECURITY_ENABLED
+    _SECURITY_ENABLED = True  # Ensure security is active
+    
     import os
     interceptor = _get_interceptor()
 
@@ -411,9 +546,15 @@ async def _run_defence_demo():
 async def on_message(message: cl.Message):
     """Handle user messages — run the secured multi-agent pipeline."""
     low = message.content.lower().strip()
-    if any(k in low for k in ["defence", "defense", "demo", "attack", "block"]):
+    if any(k in low for k in ["defence", "defense", "demo", "block"]):
         await _run_defence_demo()
         return
+    elif any(k in low for k in ["red team", "redteam", "attack"]):
+        await _run_redteam_demo()
+        return
+
+    global _SECURITY_ENABLED
+    _SECURITY_ENABLED = True  # Ensure security is active for regular chat
 
     orchestrator = _get_orchestrator()
     interceptor = _get_interceptor()

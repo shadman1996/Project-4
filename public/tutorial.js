@@ -6,7 +6,7 @@
 (function () {
   "use strict";
 
-  const KEY = "p4_tut_v3";
+  const KEY = "p4_tut_v4";
   if (localStorage.getItem(KEY)) return;
 
   // ── Inject CSS ──────────────────────────────────────────────────────────────
@@ -121,16 +121,16 @@ Every agent's output appears as a <strong>collapsible step</strong> — click an
     },
     {
       badge: "Step 4 of 6",
-      title: "🛡️ Launch the Secured Version",
-      body: `Open a terminal and run this command to start the <strong>secured system</strong> with a Human-in-the-Loop security gate:`,
+      title: "🛡️ The Defence Demo",
+      body: `You can also run the <strong>Secured System</strong> using the 🛡️ button.<br><br>
+This version has a Human-in-the-Loop security gate:`,
       target: null, waitForClick: false,
-      extra: "terminal",
-      termCmd: "chainlit run app_secured.py --port 8000",
+      extra: "hitl",
     },
     {
       badge: "Step 5 of 6",
       title: "🚨 The HITL Security Gate",
-      body: `Every dangerous agent action triggers this <strong>Security Alert</strong>. You decide: allow or block.`,
+      body: `When the interceptor is active, every dangerous agent action triggers this <strong>Security Alert</strong>. You decide: allow or block.`,
       target: null, waitForClick: false,
       extra: "hitl",
     },
@@ -139,9 +139,9 @@ Every agent's output appears as a <strong>collapsible step</strong> — click an
       title: "✅ You're Ready!",
       body: `<strong>Cheat sheet:</strong><br>
 🔴 <em>Red button</em> → 4 live prompt injection attacks<br>
-🔬 <em>Green button</em> → Safe 7-agent research demo<br>
-💬 <em>Chat box</em> → Ask your own security question<br>
-🛡️ <code>app_secured.py</code> → Human-in-the-Loop defence<br><br>
+🛡️ <em>Shield button</em> → See attacks getting blocked<br>
+🔬 <em>Microscope button</em> → Safe 7-agent research demo<br>
+💬 <em>Chat box</em> → Ask your own security question<br><br>
 Click <strong>🚀 Launch Demo</strong> to start!`,
       target: null, waitForClick: false,
     },
