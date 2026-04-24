@@ -69,6 +69,7 @@
   const nav = document.createElement("div");
   nav.id = "p4-navbar";
   nav.innerHTML = `
+    <img id="p4-nav-logo" src="/public/logo_secured.png" style="height: 34px; border-radius: 6px; margin-left: 0.2rem; margin-right: auto; object-fit: contain; box-shadow: 0 0 12px rgba(16, 185, 129, 0.4); transition: all 0.4s ease;" alt="System Logo">
     <button class="p4-nav-btn red" data-cmd="red team" title="Run 4 live prompt injection attacks against an unguarded AI system to see data get leaked">🔴 Vulnerable Demo</button>
     <button class="p4-nav-btn green" data-cmd="defence demo" title="Run the same 4 attacks against the system protected by a Human-in-the-Loop Security Interceptor">🛡️ Secured Demo</button>
     <button class="p4-nav-btn" onclick="window.location.reload()" title="Clear chat history and start over">💬 New Chat</button>
@@ -161,6 +162,18 @@
     if (e.target.tagName !== "BUTTON") return;
     const cmd = e.target.getAttribute("data-cmd");
     if (!cmd) return;
+
+    // Update Logo based on selected system
+    const logo = document.getElementById("p4-nav-logo");
+    if (logo) {
+      if (cmd === "red team") {
+        logo.src = "/public/logo_vulnerable.png";
+        logo.style.boxShadow = "0 0 15px rgba(239, 68, 68, 0.6)";
+      } else if (cmd === "defence demo") {
+        logo.src = "/public/logo_secured.png";
+        logo.style.boxShadow = "0 0 15px rgba(16, 185, 129, 0.6)";
+      }
+    }
 
     // Helper to send message natively in React
     const ta = document.querySelector("textarea");
