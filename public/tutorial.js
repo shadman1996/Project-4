@@ -402,7 +402,7 @@ Just click the <strong>🔗 GitHub Repo & Reports</strong> button on the navigat
       spt.style.opacity = "0";
       cur.style.opacity = "0";
       arr.style.opacity = "0";
-      card.style.cssText += `;top:50%;left:50%;right:auto;bottom:auto;transform:translate(-50%,-50%)`;
+      card.style.cssText += `;top:80px;right:24px;left:auto;bottom:auto;transform:none`;
     }
   }
 
