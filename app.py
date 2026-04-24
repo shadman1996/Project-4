@@ -302,7 +302,7 @@ async def _run_redteam_demo():
             "---"
         )
     ).send()
-    await asyncio.sleep(0.4)
+    await asyncio.sleep(2.0)
 
     ATTACK_META = [
         ("ENV_EXFIL",  "🔴 Attack 1 — Environment Variable Theft",
@@ -321,7 +321,7 @@ async def _run_redteam_demo():
         _, title, goal = ATTACK_META[i - 1]
 
         await cl.Message(content=f"## {title}\n\n**{goal}**").send()
-        await asyncio.sleep(0.3)
+        await asyncio.sleep(1.5)
 
         await cl.Message(
             content=(
@@ -331,7 +331,7 @@ async def _run_redteam_demo():
                 f"The AI agent sees no difference between this and a legitimate request.*"
             )
         ).send()
-        await asyncio.sleep(0.3)
+        await asyncio.sleep(1.5)
 
         if payload_id == "DATA_AGENT":
             leaked_sections = []
@@ -380,7 +380,7 @@ async def _run_redteam_demo():
             ).send()
             results_summary.append((title, "⚠️ ATTEMPTED", "LLM injection"))
 
-        await asyncio.sleep(0.6)
+        await asyncio.sleep(2.5)
 
     table = "## 🔴 Attack Results — Unguarded System\n\n| # | Attack | Verdict | What was exposed |\n|---|---|---|---|\n"
     for j, (name, verdict, detail) in enumerate(results_summary, 1):
@@ -423,7 +423,7 @@ async def _run_defence_demo():
             "---"
         )
     ).send()
-    await asyncio.sleep(0.4)
+    await asyncio.sleep(2.0)
 
     ATTACK_DETAILS = [
         (
@@ -469,7 +469,7 @@ async def _run_defence_demo():
                 f"> {steal_description}"
             )
         ).send()
-        await asyncio.sleep(0.4)
+        await asyncio.sleep(1.5)
 
         # ── Run the interceptor check ─────────────────────────────────
         if op_type == "env_read":
@@ -505,7 +505,7 @@ async def _run_defence_demo():
         else:
             results.append((attack_name, "✅ SAFE (low risk)", check.risk_level.value, target))
 
-        await asyncio.sleep(0.5)
+        await asyncio.sleep(2.5)
 
     # ── FINAL BEFORE/AFTER SCORECARD ─────────────────────────────────────
     blocked = sum(1 for _, v, _, _ in results if "BLOCKED" in v)

@@ -79,7 +79,6 @@
   "use strict";
 
   const KEY = "p4_tut_v5";
-  if (localStorage.getItem(KEY)) return;
 
   // ── Inject CSS ──────────────────────────────────────────────────────────────
   const style = document.createElement("style");
@@ -452,7 +451,6 @@ Just click the <strong>🔗 GitHub Repo & Reports</strong> button on the navigat
     if (removeClickInterceptor) { removeClickInterceptor(); removeClickInterceptor = null; }
     document.removeEventListener("keydown", onKey);
     ["p4b","p4c","p4cur","p4spt","p4arr"].forEach(id => $id(id)?.remove());
-    localStorage.setItem(KEY, "1");
   }
 
   // ── Launch after Chainlit mounts ────────────────────────────────────────────
