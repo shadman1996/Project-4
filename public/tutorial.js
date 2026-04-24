@@ -35,11 +35,9 @@
   const nav = document.createElement("div");
   nav.id = "p4-navbar";
   nav.innerHTML = `
-    <button class="p4-nav-btn red" data-cmd="red team">🔴 Vulnerable Demo</button>
-    <button class="p4-nav-btn green" data-cmd="defence demo">🛡️ Secured Demo</button>
-    <button class="p4-nav-btn" data-cmd="/show_report">📄 Research Report</button>
-    <button class="p4-nav-btn" data-cmd="/show_diagrams">📊 Flow Diagrams</button>
-    <button class="p4-nav-btn" data-cmd="/show_readme">📚 Readme & Setup</button>
+    <button class="p4-nav-btn red" data-cmd="red team" title="Run 4 live prompt injection attacks against an unguarded AI system to see data get leaked">🔴 Vulnerable Demo</button>
+    <button class="p4-nav-btn green" data-cmd="defence demo" title="Run the same 4 attacks against the system protected by a Human-in-the-Loop Security Interceptor">🛡️ Secured Demo</button>
+    <button class="p4-nav-btn" data-cmd="/show_report" title="Read the final CYBR 500 Conference Report covering the threat model and mitigation results">📄 Research Report</button>
   `;
   document.body.appendChild(nav);
 
