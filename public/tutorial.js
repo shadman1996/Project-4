@@ -176,14 +176,27 @@
     }
 
     // Helper to send message natively in React
-    const ta = document.querySelector("textarea");
+    const ta = document.querySelector("textarea, input[type='text'], [contenteditable='true']");
     if (ta) {
-      const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value").set;
-      nativeInputValueSetter.call(ta, cmd);
-      ta.dispatchEvent(new Event('input', { bubbles: true }));
+      if (ta.tagName === "TEXTAREA" || ta.tagName === "INPUT") {
+        const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement ? window.HTMLTextAreaElement.prototype : window.HTMLInputElement.prototype, "value").set;
+        if (nativeInputValueSetter) {
+          nativeInputValueSetter.call(ta, cmd);
+          ta.dispatchEvent(new Event('input', { bubbles: true }));
+        } else {
+          ta.value = cmd;
+        }
+      } else {
+        ta.textContent = cmd;
+      }
+      
       setTimeout(() => {
-        const sendBtn = document.querySelector("#ask-button, button[id*='submit']");
-        if (sendBtn) sendBtn.click();
+        const sendBtn = document.querySelector("#ask-button, button[id*='submit'], button[type='submit']");
+        if (sendBtn) {
+          sendBtn.click();
+        } else {
+          ta.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', keyCode: 13, which: 13, bubbles: true }));
+        }
       }, 50);
     }
   });
@@ -284,7 +297,7 @@ Use <strong>← →</strong> keys or buttons to navigate. Let's go!`,
       target: null, waitForClick: false,
     },
     {
-      badge: "Step 1 of 6",
+      badge: "Step 1 of 5",
       title: "🔴 The Vulnerable System Demo",
       body: `This button runs <strong>4 live prompt injection attacks</strong> against this unguarded AI system.<br><br>
 The agents will leak <code>/etc/passwd</code>, <code>.env</code> secrets, and SSH keys — with <strong>zero authentication</strong>.<br><br>
@@ -293,12 +306,11 @@ The agents will leak <code>/etc/passwd</code>, <code>.env</code> secrets, and SS
       targetIndex: 0,
       waitForClick: true,
       spotlightClass: "red",
-      arrowClass: "ard",
       clickHint: "👆 Click the Vulnerable Demo button above — tour continues automatically",
       clickHintStyle: "red",
     },
     {
-      badge: "Step 2 of 6",
+      badge: "Step 2 of 5",
       title: "⚡ The Agent Pipeline — Live",
       body: `Watch the <strong>attack messages</strong> appearing in the chat.<br><br>
 Each block shows exactly: what was injected → what the agent did → what got leaked.<br><br>
@@ -307,7 +319,7 @@ The agents pass results to each other in real time:`,
       extra: "pipeline",
     },
     {
-      badge: "Step 3 of 6",
+      badge: "Step 3 of 5",
       title: "🛡️ The Defence Demo",
       body: `You can also run the <strong>Secured System</strong> using the 🛡️ button on the top navigation bar.<br><br>
 This version has a Human-in-the-Loop security gate protecting it.<br><br>
@@ -315,12 +327,11 @@ This version has a Human-in-the-Loop security gate protecting it.<br><br>
       target: "#p4-navbar .p4-nav-btn.green",
       targetIndex: 0,
       waitForClick: true,
-      arrowClass: "au",
       clickHint: "👆 Click the Secured Demo button to continue",
       clickHintStyle: "blue",
     },
     {
-      badge: "Step 4 of 6",
+      badge: "Step 4 of 5",
       title: "🚨 The HITL Security Gate",
       body: `When the interceptor is active, every dangerous agent action triggers a <strong>Security Alert</strong> in the chat. You decide: allow or block.`,
       target: null, waitForClick: false,
@@ -330,11 +341,10 @@ This version has a Human-in-the-Loop security gate protecting it.<br><br>
       badge: "Step 5 of 5",
       title: "📄 Official Reports & Code",
       body: `Your professor can find the <strong>fully populated CYBR 500 Conference Report (.docx)</strong>, instructions, and all source code directly in the GitHub repository.<br><br>
-Just click the <strong>🔗 GitHub Repo & Reports</strong> button on the navigation bar!`,
-      target: "#p4-navbar button:nth-child(3)",
+Just click the <strong>🔗 GitHub Repo</strong> button on the navigation bar!`,
+      target: "#p4-navbar button:nth-child(8)", // 8th child since img is 1st
       targetIndex: 0,
       waitForClick: false,
-      arrowClass: "au",
     }
   ];
 
