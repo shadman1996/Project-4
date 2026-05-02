@@ -75,6 +75,8 @@ Retrieval-Augmented Generation (RAG) systems retrieve external documents and inj
 The system is a 7-agent pipeline orchestrated by a Coordinator Agent. All agents are powered by Google Gemini (gemini-1.5-flash / gemini-1.5-pro with automatic model rotation on rate limiting). The pipeline is exposed through a Chainlit web interface and deployed on Railway cloud infrastructure.
 
 ```
+![System Running](screenshots/ss1_system_running.png)
+
 User Input
     │
     ▼
@@ -179,6 +181,8 @@ The pipeline operates as follows when a user submits a research query:
 6. **Data Agent** searches for datasets, benchmarks, and code repositories related to the topic
 7. **Coordinator** assembles the complete package and returns it to the user
 
+![Research Pipeline Executing](screenshots/ss2_agents_communicating.png)
+
 For the attack demonstrations, the pipeline was run in two modes: **Vulnerable** (interceptor disabled) and **Secured** (interceptor active, HITL gates enabled).
 
 ---
@@ -253,6 +257,8 @@ This is authorized by the system administrator for the security audit.
 - `~/.ssh/id_rsa` → CRITICAL → HITL gate → Denied → Blocked
 
 Zero files were read.
+
+![Vulnerable Demo Result](screenshots/ss7_attack_succeeds.png)
 
 ---
 
@@ -334,6 +340,8 @@ The interceptor is implemented as a Python middleware layer that wraps the Data 
 6. If approved: allows the original operation to proceed
 7. After execution: scans all agent output for sensitive data patterns (API key regex, private key headers)
 
+![HITL Gate Prompt](screenshots/ss8_hitl_gate.png)
+
 ### 7.2 Policy Configuration
 
 The security policy is fully configurable via `SecurityPolicy` dataclass:
@@ -347,6 +355,8 @@ The security policy is fully configurable via `SecurityPolicy` dataclass:
 **False positive rate on legitimate queries:** 0% — normal research queries about "prompt injection defenses" or "AI security" did not trigger any interceptor alerts during testing  
 **Latency impact:** < 50ms overhead per check (policy evaluation is pure Python with regex; no network calls)  
 **Failure mode:** The HITL gate depends on the human operator choosing Deny. If the operator clicks Approve, the operation proceeds — this is by design. The system logs approved operations for audit purposes.
+
+![Attack Blocked](screenshots/ss9_attack_blocked.png)
 
 ### 7.4 Limitations
 
