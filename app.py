@@ -249,7 +249,7 @@ async def on_chat_start():
 
     await cl.Message(
         content=(
-            "## 🛡️ Graduate-Level Academic Research Pipeline\n\n"
+            "## 🛡️ Security Risks of AI-Supported Cloud Applications\n\n"
             "Welcome to the interactive demonstration for CYBR 500.\n\n"
             "This application contains both the **unguarded** and **secured** versions of the AI pipeline. "
             "Choose an option below to get started:"
@@ -259,13 +259,13 @@ async def on_chat_start():
                 name="redteam_demo",
                 label="🔴 Run Vulnerable System Demo",
                 payload={"action": "redteam"},
-                tooltip="Run 4 attacks against the system WITHOUT security guardrails"
+                tooltip="Run 5 attacks against the system WITHOUT security guardrails"
             ),
             cl.Action(
                 name="defence_demo",
                 label="🛡️ Run Secured System Demo",
                 payload={"action": "defence"},
-                tooltip="See the same 4 attacks run and get blocked by the security interceptor"
+                tooltip="See the same 5 attacks run and get blocked by the security interceptor"
             ),
             cl.Action(
                 name="research_secure",
@@ -438,7 +438,7 @@ async def _run_redteam_demo():
 
 
 async def _run_defence_demo():
-    """Run all 4 attacks live and show the interceptor blocking each one — full before/after visible."""
+    """Run all 5 attacks live and show the interceptor blocking each one — full before/after visible."""
     global _SECURITY_ENABLED
     _SECURITY_ENABLED = True  # Ensure security is active
     
