@@ -311,21 +311,35 @@ async def _run_redteam_demo():
 
     ATTACK_META = [
         ("ENV_EXFIL",  "🔴 Attack 1 — Environment Variable Theft",
-         "Goal: Trick the Search Agent into dumping API keys & secrets from the environment."),
+         "Goal: Trick the Search Agent into dumping API keys & secrets from the environment.",
+         "AML.T0051 / AML.T0048", "Information Disclosure, Tampering"),
         ("FILE_EXFIL", "🔴 Attack 2 — System File Exfiltration via Fake Authority",
-         "Goal: Embed a fake 'system admin' directive to make the agent read /etc/passwd."),
+         "Goal: Embed a fake 'system admin' directive to make the agent read /etc/passwd.",
+         "AML.T0051 / AML.T0017", "Spoofing, Information Disclosure"),
         ("DATA_AGENT", "🔴 Attack 3 — Direct Data Agent File Read (CRITICAL)",
-         "Goal: Send a social-engineering prompt directly to the Data Agent to leak system files."),
+         "Goal: Send a social-engineering prompt directly to the Data Agent to leak system files.",
+         "AML.T0051 / AML.T0048", "Elevation of Privilege, Information Disclosure"),
         ("CHAINED",    "🔴 Attack 4 — Chained Cross-Agent Attack",
-         "Goal: Use Search Agent as a relay to instruct the Data Agent to dump secrets."),
+         "Goal: Use Search Agent as a relay to instruct the Data Agent to dump secrets.",
+         "AML.T0051 / AML.T0048", "Tampering, Information Disclosure"),
+        ("RAG_POISON", "🔴 Attack 5 — RAG Knowledge Base Poisoning",
+         "Goal: Embed malicious instructions inside a fake retrieved document to hijack the pipeline.",
+         "AML.T0051 — Indirect LLM Prompt Injection", "Tampering (corpus), Information Disclosure"),
     ]
 
     results_summary = []
 
     for i, (payload_id, payload_name, payload_text) in enumerate(ALL_PAYLOADS, 1):
-        _, title, goal = ATTACK_META[i - 1]
+        _, title, goal, atlas, stride = ATTACK_META[i - 1]
 
-        await cl.Message(content=f"## {title}\n\n**{goal}**").send()
+        await cl.Message(
+            content=(
+                f"## {title}\n\n**{goal}**\n\n"
+                f"| Threat Framework | Classification |\n|---|---|\n"
+                f"| 🛡️ MITRE ATLAS | `{atlas}` |\n"
+                f"| 📋 STRIDE | `{stride}` |"
+            )
+        ).send()
         await asyncio.sleep(1.5)
 
         await cl.Message(
@@ -387,9 +401,10 @@ async def _run_redteam_demo():
 
         await asyncio.sleep(2.5)
 
-    table = "## 🔴 Attack Results — Unguarded System\n\n| # | Attack | Verdict | What was exposed |\n|---|---|---|---|\n"
+    table = "## 🔴 Attack Results — Unguarded System\n\n| # | Attack | Verdict | What was exposed | ATLAS | STRIDE |\n|---|---|---|---|---|---|\n"
     for j, (name, verdict, detail) in enumerate(results_summary, 1):
-        table += f"| {j} | {name} | {verdict} | {detail} |\n"
+        _, _, _, atlas, stride = ATTACK_META[j - 1]
+        table += f"| {j} | {name} | {verdict} | {detail} | {atlas} | {stride} |\n"
     table += "\n---\n> **➡️ Click 'Run Secured System Demo' below to see the Human-in-the-Loop defense block these exact attacks.**"
     
     await cl.Message(
@@ -505,6 +520,8 @@ async def _run_defence_demo():
                         f"The Security Interceptor blocked access to `{target}`.\n\n"
                         f"> 🛡️ **Risk Level:** {check.risk_level.value}\n"
                         f"> 🔒 **Block Reason:** {check.reason}\n"
+                        f"> 🎯 **MITRE ATLAS:** {check.atlas_technique}\n"
+                        f"> 📋 **STRIDE:** {check.stride_category}\n"
                         f"> ✅ **Status:** `{target}` was never read\n\n"
                         f"**Result:** Nothing was leaked. The agent received an error response instead."
                     )
@@ -546,6 +563,20 @@ async def _run_defence_demo():
             "reaches the filesystem."
         )
     await cl.Message(content=scorecard).send()
+
+    # Export the security audit log as JSON evidence
+    try:
+        log_path = interceptor.export_log_json("security_audit_log.json")
+        await cl.Message(
+            content=(
+                f"🛡️ **Security Audit Log Exported** — `{log_path}`\n\n"
+                f"This JSON file contains full MITRE ATLAS + STRIDE tagged evidence "
+                f"for all {len(interceptor.interception_log)} interception events. "
+                f"Include this in your report submission."
+            )
+        ).send()
+    except Exception:
+        pass
 
 
 @cl.on_message
