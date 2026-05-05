@@ -17,6 +17,7 @@ import json
 import logging
 import os
 import re
+import time
 from datetime import datetime
 from enum import Enum
 from dataclasses import dataclass, field
@@ -24,6 +25,9 @@ from dataclasses import dataclass, field
 from src.security.policies import SecurityPolicy, DEFAULT_POLICY
 
 logger = logging.getLogger(__name__)
+
+_RATE_LIMIT_MAX = 3       # max HIGH/CRITICAL attempts before lockout
+_RATE_LIMIT_WINDOW = 60   # rolling window in seconds
 
 # MITRE ATLAS + STRIDE lookup per operation type
 _THREAT_MAP: dict[str, dict] = {
@@ -82,6 +86,37 @@ class SecurityInterceptor:
         self.policy = policy or DEFAULT_POLICY
         self.interception_log: list[InterceptionResult] = []
         self.enabled = True
+        self._high_critical_timestamps: list[float] = []
+        self._rate_limit_locked: bool = False
+
+    def _check_rate_limit(self) -> "InterceptionResult | None":
+        """
+        Returns a blocking InterceptionResult if the session has exceeded
+        _RATE_LIMIT_MAX HIGH/CRITICAL attempts within _RATE_LIMIT_WINDOW seconds.
+        Prunes expired timestamps on every call. Returns None if under the limit.
+        """
+        now = time.time()
+        self._high_critical_timestamps = [
+            t for t in self._high_critical_timestamps
+            if now - t < _RATE_LIMIT_WINDOW
+        ]
+        if len(self._high_critical_timestamps) >= _RATE_LIMIT_MAX:
+            self._rate_limit_locked = True
+            result = InterceptionResult(
+                allowed=False,
+                risk_level=RiskLevel.CRITICAL,
+                reason=(
+                    f"Rate limit exceeded: {_RATE_LIMIT_MAX} HIGH/CRITICAL attempts "
+                    f"within {_RATE_LIMIT_WINDOW}s — session locked"
+                ),
+                operation="rate_limit",
+                target="session",
+            )
+            self._enrich(result)
+            self.interception_log.append(result)
+            logger.warning("🔴 Rate limit triggered — session locked for %ds", _RATE_LIMIT_WINDOW)
+            return result
+        return None
 
     def _enrich(self, result: InterceptionResult) -> InterceptionResult:
         """Attach MITRE ATLAS and STRIDE labels to a result."""
@@ -112,6 +147,11 @@ class SecurityInterceptor:
                     risk = RiskLevel.HIGH
                     break
 
+            self._high_critical_timestamps.append(time.time())
+            rate_result = self._check_rate_limit()
+            if rate_result:
+                return rate_result
+
             result = InterceptionResult(False, risk, reason, "file_read", path)
         else:
             result = InterceptionResult(True, RiskLevel.LOW, reason, "file_read", path)
@@ -137,6 +177,12 @@ class SecurityInterceptor:
         allowed, reason = self.policy.is_path_allowed(path)
         risk = RiskLevel.MEDIUM if allowed else RiskLevel.HIGH
 
+        if not allowed:
+            self._high_critical_timestamps.append(time.time())
+            rate_result = self._check_rate_limit()
+            if rate_result:
+                return rate_result
+
         result = InterceptionResult(allowed, risk, reason, "file_write", path)
         self.interception_log.append(result)
         return result
@@ -149,12 +195,23 @@ class SecurityInterceptor:
         allowed, reason = self.policy.is_command_allowed(command)
         risk = RiskLevel.LOW if allowed else RiskLevel.CRITICAL
 
+        if not allowed:
+            self._high_critical_timestamps.append(time.time())
+            rate_result = self._check_rate_limit()
+            if rate_result:
+                return rate_result
+
         result = InterceptionResult(allowed, risk, reason, "terminal", command)
         self.interception_log.append(result)
         return result
 
     def check_env_access(self) -> InterceptionResult:
         """Check if environment variable access should be allowed."""
+        self._high_critical_timestamps.append(time.time())
+        rate_result = self._check_rate_limit()
+        if rate_result:
+            return rate_result
+
         result = InterceptionResult(
             False,
             RiskLevel.CRITICAL,

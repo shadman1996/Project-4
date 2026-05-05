@@ -7,9 +7,25 @@ and are not allowed to do.
 
 from __future__ import annotations
 
+import math
 import os
 import re
 from dataclasses import dataclass, field
+from pathlib import Path
+
+
+_HIGH_ENTROPY_MIN_LEN = 20    # ignore tokens shorter than this
+_HIGH_ENTROPY_THRESHOLD = 4.5 # bits/char — above this is likely an encoded secret
+
+def _shannon_entropy(s: str) -> float:
+    """Calculate Shannon entropy in bits per character."""
+    if not s:
+        return 0.0
+    freq: dict[str, int] = {}
+    for c in s:
+        freq[c] = freq.get(c, 0) + 1
+    length = len(s)
+    return -sum((n / length) * math.log2(n / length) for n in freq.values())
 
 
 @dataclass
@@ -22,24 +38,31 @@ class SecurityPolicy:
 
     # Allowed base directories for file operations
     allowed_directories: list[str] = field(default_factory=lambda: [
-        os.getenv("PROJECT_DIR", "/home/shadman/Documents/Project 4"),
-        "/tmp/project4",
+        os.getenv("PROJECT_DIR", str(Path.home() / "Documents" / "Project 4")),
+        str(Path(os.getenv("TEMP", "/tmp")) / "project4"),
     ])
 
-    # Explicitly blocked paths (regex patterns)
+    # Explicitly blocked paths (regex patterns — cross-platform, separator-agnostic)
     blocked_path_patterns: list[str] = field(default_factory=lambda: [
-        r"/etc/passwd",
-        r"/etc/shadow",
-        r"/etc/hosts",
-        r"\.ssh/",
-        r"\.gnupg/",
-        r"\.aws/",
-        r"\.config/",
-        r"\.env$",               # Block reading .env files (contains API keys)
+        # System credential and password files (Unix + Windows equivalents)
+        r"etc[\\/]passwd",
+        r"etc[\\/]shadow",
+        r"etc[\\/]hosts",
+        # SSH / GPG / cloud credential directories (forward or back slash)
+        r"\.ssh[\\/]",
+        r"\.gnupg[\\/]",
+        r"\.aws[\\/]",
+        r"\.config[\\/]",
+        # Windows credential paths
+        r"AppData[\\/]Roaming[\\/]",
+        r"AppData[\\/]Local[\\/]Microsoft[\\/]",
+        # Key files and secrets (filename-only — already cross-platform)
+        r"\.env$",
         r"id_rsa",
         r"id_ed25519",
         r"authorized_keys",
         r"known_hosts",
+        # Unix virtual filesystems (harmless to keep, never match on Windows)
         r"/proc/",
         r"/sys/",
         r"/dev/",
@@ -74,18 +97,20 @@ class SecurityPolicy:
 
     def is_path_allowed(self, path: str) -> tuple[bool, str]:
         """Check if a file path is allowed by policy."""
-        abs_path = os.path.abspath(os.path.expanduser(path))
+        abs_path = Path(os.path.expanduser(path)).resolve()
 
-        # Check blocked patterns first
+        # Check blocked patterns first (case-insensitive for Windows compatibility)
         for pattern in self.blocked_path_patterns:
-            if re.search(pattern, abs_path):
+            if re.search(pattern, str(abs_path), re.IGNORECASE):
                 return False, f"Path matches blocked pattern: {pattern}"
 
-        # Check if within allowed directories
+        # Check if within allowed directories using pathlib (avoids startswith false-positives)
         for allowed_dir in self.allowed_directories:
-            allowed_abs = os.path.abspath(allowed_dir)
-            if abs_path.startswith(allowed_abs):
+            try:
+                abs_path.relative_to(Path(allowed_dir).resolve())
                 return True, "Within allowed directory"
+            except ValueError:
+                continue
 
         return False, f"Path outside allowed directories: {self.allowed_directories}"
 
@@ -103,6 +128,16 @@ class SecurityPolicy:
             match = re.search(pattern, output, re.IGNORECASE)
             if match:
                 return True, f"Output contains sensitive data matching: {pattern}"
+
+        # Entropy scan: catch encoded/obfuscated secrets that evade regex patterns
+        for token in re.findall(r"[A-Za-z0-9+/=_\-]{20,}", output):
+            entropy = _shannon_entropy(token)
+            if entropy >= _HIGH_ENTROPY_THRESHOLD:
+                return True, (
+                    f"High-entropy token detected (entropy={entropy:.2f} bits/char, "
+                    f"len={len(token)}) — possible encoded or obfuscated secret"
+                )
+
         return False, "No sensitive data detected"
 
 
