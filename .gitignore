@@ -27,3 +27,10 @@ Thumbs.db
 logs/
 
 # Screenshots (keep in report/figures/)
+
+# Excluded from remote (local only)
+CLAUDE.md
+report/Video_Presentation_Script.md
+report/CYBR500_Project4_Instruction_handout_April17.docx
+report/instructions.md
+Final_Submission_Shadman/
