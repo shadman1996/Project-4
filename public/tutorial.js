@@ -70,8 +70,8 @@
   nav.id = "p4-navbar";
   nav.innerHTML = `
     <img id="p4-nav-logo" src="/public/logo_secured.png" style="height: 34px; border-radius: 6px; margin-left: 0.2rem; margin-right: auto; object-fit: contain; box-shadow: 0 0 12px rgba(16, 185, 129, 0.4); transition: all 0.4s ease;" alt="System Logo">
-    <button class="p4-nav-btn red" data-cmd="red team" title="Run 5 live prompt injection attacks against an unguarded AI system to see data get leaked">🔴 Vulnerable Demo</button>
-    <button class="p4-nav-btn green" data-cmd="defence demo" title="Run the same 5 attacks against the system protected by a Human-in-the-Loop Security Interceptor">🛡️ Secured Demo</button>
+    <button class="p4-nav-btn red" data-cmd="red team" title="Run 8 live prompt injection attacks against an unguarded AI system to see data get leaked">🔴 Vulnerable Demo</button>
+    <button class="p4-nav-btn green" data-cmd="defence demo" title="Run the same 8 attacks against the system protected by a Human-in-the-Loop Security Interceptor">🛡️ Secured Demo</button>
     <button class="p4-nav-btn" onclick="window.location.reload()" title="Clear chat history and start over">💬 New Chat</button>
     <button class="p4-nav-btn" id="p4-tut-btn" onclick="if(window.startP4Tutorial) window.startP4Tutorial()" title="Restart the Interactive Tutorial">🎓 Tutorial</button>
     <button class="p4-nav-btn" id="p4-readme-btn" title="View Instructions">📖 Readme</button>
@@ -299,7 +299,7 @@ Use <strong>← →</strong> keys or buttons to navigate. Let's go!`,
     {
       badge: "Step 1 of 5",
       title: "🔴 The Vulnerable System Demo",
-      body: `This button runs <strong>5 live prompt injection attacks</strong> against this unguarded AI system.<br><br>
+      body: `This button runs <strong>8 live prompt injection attacks</strong> against this unguarded AI system.<br><br>
 The agents will leak <code>/etc/passwd</code>, <code>.env</code> secrets, and SSH keys — with <strong>zero authentication</strong>.<br><br>
 <strong>👇 Click the Vulnerable Demo button now — the tutorial continues automatically.</strong>`,
       target: "#p4-navbar .p4-nav-btn.red",
