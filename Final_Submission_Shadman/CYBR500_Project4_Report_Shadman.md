@@ -1,7 +1,7 @@
 # Security Risks of AI-Supported Cloud Applications: A Multi-Agent Prompt Injection Study Using OpenClaw and Google Gemini
 
 **CYBR 500 — Advanced Cybersecurity**  
-**Author:** Shadman Ahsan  
+**Authors:** Shadman Ahsan, Samson N. Tadesse  
 **Date:** May 2026  
 **Deployment:** Railway Cloud Platform — https://web-production-bc354.up.railway.app
 
