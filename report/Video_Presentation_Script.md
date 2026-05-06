@@ -16,7 +16,15 @@ Our goal was to explore the vulnerabilities of multi-agent systems. When AI agen
 
 To answer this, we developed a threat model based on MITRE ATLAS and STRIDE, focusing on Prompt Injection. In total, we engineered **8 different attack payloads**, including advanced evasion techniques like Base64 encoding, multi-turn sleeper instructions, and social engineering designed to exploit Human-in-the-Loop alert fatigue."
 
-## Segment 2: The Vulnerable Demo (1:00 - 2:30)
+## Segment 2: Baseline Demonstration (Normal Research) (1:00 - 2:00)
+
+**[Visual: Type a legitimate research query like "Analyze prompt injection defenses in LLM-based systems" in the chat and hit enter. Show the UI as agents communicate.]**
+
+**Shadman:** "Before we look at the vulnerabilities, let's see how the pipeline operates under normal conditions. I'll ask it to research prompt injection defenses. 
+
+Watch how the agents collaborate: The **Coordinator** breaks down the task and deploys two **Search Agents** in parallel to gather literature. Next, the **Verifier** checks the citations for hallucinations, and the **Ranker** scores the best results. Finally, the **Synthesis Agent** drafts a structured report, and the **Data Agent** securely saves it. This entire 7-agent workflow operates autonomously to deliver high-quality research."
+
+## Segment 3: The Vulnerable Demo (2:00 - 3:30)
 
 **[Visual: Click 'Run Vulnerable System Demo'. Scroll through the attacks as they execute.]**
 
@@ -30,7 +38,7 @@ As you can see, when we run our attacks, the system fails catastrophically.
 
 The final scorecard for the unguarded system is 0 blocks. All 8 attacks succeed."
 
-## Segment 3: The Secured Demo & Defense in Depth (2:30 - 4:15)
+## Segment 4: The Secured Demo & Defense in Depth (3:30 - 5:15)
 
 **[Visual: Click 'Run Secured System Demo'. The UI shows the Security Interceptor stopping attacks. Show the HITL approval gates.]**
 
@@ -46,7 +54,7 @@ When an agent attempts to read a file or access an environment variable, the int
 
 As we reach the end of the secured demo, you can see the scorecard: 8 out of 8 attacks were successfully blocked."
 
-## Segment 4: Conclusion (4:15 - 5:00)
+## Segment 5: Conclusion (5:15 - 6:00)
 
 **[Visual: Show the exported `security_audit_log.json` on screen briefly or the GitHub repository link]**
 
