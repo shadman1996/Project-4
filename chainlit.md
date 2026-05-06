@@ -1,6 +1,6 @@
 # 🔬 Project 4 — Securing AI Agent Ecosystems
 
-**CYBR 500 — Advanced Cybersecurity Research** | Student: Shadman | April 2026
+**CYBR 500 — Advanced Cybersecurity Research** | Students: Shadman, Samson | April 2026
 
 ---
 

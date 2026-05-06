@@ -1,7 +1,7 @@
 # Security Risks of AI-Supported Cloud Applications
 
 **CYBR 500 — Advanced Cybersecurity Research (Project 4)**  
-**Author:** Shadman Ahsan  
+**Authors:** Shadman Ahsan, Samson N. Tadesse  
 **Date:** May 2026  
 **Topic:** Security Risks of AI-Supported Cloud Applications (MITRE ATLAS, STRIDE, RAG Attack Surfaces)
 
@@ -15,11 +15,11 @@ This project is live and deployed on Railway Cloud:
 All official documentation required for the CYBR 500 Project 4 submission can be found in the **[`report/`](./report)** folder of this repository:
 1. `CYBR500_Project4_Report.md` — The fully populated 12-section final report, including the AI-Assisted Learning Appendix.
 
-This project is a 7-agent AI research assistant system built with OpenClaw and Google Gemini, featuring a Chainlit dashboard. It investigates the security risks of autonomous AI agents by demonstrating 5 live prompt injection attacks against an unguarded AI pipeline, followed by a secured version demonstrating a Human-in-the-Loop (HITL) Security Interceptor.
+This project is a 7-agent AI research assistant system built with OpenClaw and Google Gemini, featuring a Chainlit dashboard. It investigates the security risks of autonomous AI agents by demonstrating 8 live prompt injection attacks against an unguarded AI pipeline, followed by a secured version demonstrating a Human-in-the-Loop (HITL) Security Interceptor.
 
 ## Features
 - **Live Agent Pipeline:** Run a full 7-agent academic research pipeline (Coordinator, Search-A, Search-B, Verifier, Ranker, Synthesis, Data).
-- **Vulnerable Demo:** Run 5 live prompt injection attacks — including environment variable exfiltration, system file leaks, and RAG Knowledge Base poisoning.
+- **Vulnerable Demo:** Run 8 live prompt injection attacks — including environment variable exfiltration, system file leaks, RAG Knowledge Base poisoning, and Multi-Turn Sleeper exploitation.
 - **Secured Demo:** Runs the exact same attacks against a Human-in-the-Loop Security Interceptor, showing the attacks being blocked in real-time.
 - **Threat Taxonomy:** All attacks are explicitly mapped to **MITRE ATLAS** techniques and **STRIDE** threat categories in the live UI.
 - **Security Audit Logging:** The secured demo automatically exports a `security_audit_log.json` file detailing all intercepted threats.
